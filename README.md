@@ -1,48 +1,51 @@
-# Projeto Compras — Gestão de Requisições de Compra
+# CompraFlow — Gestão de Requisições de Compra
 
-Aplicação para registrar e tramitar requisições de compra, hospedada no
-**GitHub Pages**, com API em **Google Apps Script**, dados na **Planilha
-"Compras_DB"** e anexos no **Google Drive** (pasta privada "Compras Anexos").
-
-> Este projeto **substituiu** a versão anterior em Django (que roda apenas
-> localmente e não faz parte deste repositório).
+Sistema web white-label para registro e tramitação de requisições de compra.
+Cada cliente roda sua própria instância (um container, um banco, seus anexos),
+com identidade visual configurável por variáveis de ambiente.
 
 ---
 
 ## 1. Estrutura do repositório
 
 ```
-docs/                    # SPA estática (servida pelo GitHub Pages)
-├── index.html           # casca única + rotas (#/login, #/home, ...)
-├── css/style.css        # visual SENAI (azul #003876, laranja #E84910)
-├── js/                  # config, sessão, api, roteador, ui e as views
-└── README.md            # GUIA COMPLETO DE IMPLANTAÇÃO (planilha, deploy, uso)
+backend/                 # API FastAPI + SPA servida
+├── app/
+│   ├── main.py          # app FastAPI (serve /api e os assets da SPA)
+│   ├── rest.py          # superfície REST (/api/auth, /api/pedidos, ...)
+│   ├── routers/         # regras de negócio (auth, pedidos, anexos, usuários, agregações)
+│   ├── models.py        # ORM (SQLite; migra para Postgres sem reescrita)
+│   ├── config.py        # configuração central por variáveis de ambiente
+│   ├── security.py      # senhas (bcrypt) e sessões
+│   ├── storage.py       # anexos em disco (abstração p/ S3/R2 futuramente)
+│   ├── oidc.py          # SSO corporativo (Microsoft Entra ID / OIDC)
+│   └── seed.py          # admin inicial idempotente
+├── requirements.txt
+└── Dockerfile
 
-google-apps-script/      # código da API (colar num projeto Apps Script
-                         # vinculado à planilha "Compras_DB")
-├── Code.gs              # roteador das ações (POST {action, token, payload})
-├── Utils.gs             # acesso às abas, sessões, senhas (SHA-256+salt), LockService
-├── Auth.gs · Usuarios.gs
-├── Pedidos.gs           # criar/enviar/assumir/designar/tramitar/excluir
-├── Anexos.gs            # valida e grava anexos no Drive (10 MB, whitelist)
-├── Dashboard.gs · Performance.gs
-└── Setup.gs             # inicializar() + criarGestorInicial()
+frontend/                # SPA (vanilla JS, sem build step)
+├── index.html
+├── css/                 # tema + seções (variáveis CSS p/ white-label)
+├── js/                  # config, sessão, api, roteador e views
+└── README.md
+
+proxy/Caddyfile          # TLS/HTTPS opcional na frente do container
+docker-compose.yml       # orquestração (api + proxy)
+DEPLOY.md                # GUIA COMPLETO DE IMPLANTAÇÃO POR CLIENTE
+.env.example             # variáveis de ambiente (um .env = um cliente)
 ```
-
-O banco antigo (Django/SQLite) continha apenas **dados de teste** — nada foi
-migrado; o sistema parte **limpo** (usuários reais se auto-cadastram).
 
 ## 2. Fluxo de status
 
 ```
 Aberta ──(Enviar)──▶ Enviada ──(Assumir/Designar)──▶ Em Análise ──▶ Concluída
-                                                                 └──▶ Cancelada
+                                                                  └──▶ Cancelada
 ```
 
 - Nº da requisição gerado automaticamente (`REQ-000001`);
 - **Retorno final** obrigatório ao concluir; Data de Encerramento nos status
   terminais; lead time calculado (Envio → Encerramento, ou hoje, se aberta);
-- Assunção atômica (`LockService` + recheck) — só um membro assume;
+- Assunção atômica (`UPDATE` condicional) — só um membro assume;
 - Documentação (anexo) obrigatória no registro; Cotação obrigatória quando
   "Possui cotação? = Sim".
 
@@ -51,19 +54,22 @@ Aberta ──(Enviar)──▶ Enviada ──(Assumir/Designar)──▶ Em Aná
 | Grupo | Papel |
 |---|---|
 | `UserISI_IST` | Solicitante — registra, envia, exclui (próprias, Abertas) e acompanha |
-| `Time_Compras` | Team de compras — assume e tramita |
+| `Time_Compras` | Time de compras — assume e tramita |
 | `Manager_Compras` | Gestão — designa/redesigna, tramita, Performance e gestão de usuários |
 | `SuperUsuario` | Acesso total |
 
 Regras: ninguém gerencia a si mesmo; a Gestão gerencia só o Time de Compras;
 exclusão de usuário bloqueada se houver requisições vinculadas.
 
-## 4. Implantação e uso
+## 4. Rodando localmente
 
-Todas as etapas (criar a planilha, colar os `.gs`, `inicializar()`, executar
-`criarGestorInicial()`, subir o deploy do Web App e ativar o Pages para a
-pasta `docs/`) estão no guia:
+```bash
+cp .env.example .env            # ajuste o que precisar
+docker compose up -d --build    # sobe api (+ proxy com TLS em :80/:443)
+```
 
-**[`docs/README.md`](docs/README.md)**
+Acesso inicial da Gestão: `admin@compraflow.com.br` / `admin123` —
+trocar a senha no 1º login.
 
-Acesso inicial da Gestão: `admin@ms.senai.br` / `admin123` — trocar a senha no 1º login.
+O guia completo (deploy em free tiers, variáveis por cliente, customização
+de tema) está em **[`DEPLOY.md`](DEPLOY.md)**.
