@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 160" role="img" aria-label="CompraFlow">
+  <!-- Ícone: carrinho com linhas de fluxo -->
+  <g>
+    <rect x="10" y="10" width="140" height="140" rx="30" fill="#1B7A43"/>
+    <!-- corpo do carrinho -->
+    <path d="M40 48h14l10 52h58l12-38H62" fill="none" stroke="#FFFFFF" stroke-width="9"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- linhas de fluxo (movimentação) -->
+    <path d="M78 62h44" stroke="#A9D3B8" stroke-width="7" stroke-linecap="round"/>
+    <path d="M78 78h32" stroke="#A9D3B8" stroke-width="7" stroke-linecap="round"/>
+    <!-- rodas -->
+    <circle cx="72" cy="124" r="9" fill="#FFFFFF"/>
+    <circle cx="116" cy="124" r="9" fill="#FFFFFF"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="180" y="102" font-family="Montserrat, 'Segoe UI', Arial, sans-serif"
+        font-size="56" font-weight="700" fill="#1E2A38">Compra<tspan fill="#1B7A43">Flow</tspan></text>
+</svg>

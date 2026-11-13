@@ -11,7 +11,7 @@ function montarLayout() {
     <div id="mensagens-flutuantes" hidden></div>
     <aside class="sidebar">
       <a class="sidebar-marca" href="#/home">
-        <span class="sidebar-logo"><img src="img/SENAI.png" alt="SENAI | Sistema FIEMS"></span>
+        <span class="sidebar-logo"><img src="img/logo.svg" alt="CompraFlow"></span>
       </a>
       <div class="sidebar-meio">
         <nav class="sidebar-nav" id="sidebar-nav"></nav>
@@ -25,7 +25,7 @@ function montarLayout() {
           <span class="usuario">${esc(s.nome)}</span>
         </div>
         <footer class="rodape-marca rodape-lateral">
-          <img src="img/SENAI.png" alt="SENAI | Sistema FIEMS">
+          <img src="img/logo.svg" alt="CompraFlow">
         </footer>
       </div>
     </aside>
