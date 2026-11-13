@@ -1,7 +1,19 @@
-/DOCKER.md
-/backend
-/docker-compose.yml
-/docs
-/frontend
-/google-apps-script
-/proxy
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Dados locais / ambiente
+.env
+*.db
+*.sqlite3
+data/
+backend/data/
+
+# Anexos de usuarios (nunca versionar)
+anexos/
+
+# Sistema
+.DS_Store
+node_modules/

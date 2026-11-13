@@ -1,0 +1,64 @@
+services:
+  api:
+    build: ./backend
+    container_name: compras-api
+    restart: unless-stopped
+    environment:
+      DATA_DIR: /data
+      # Conta administrativa (troque a senha no 1º login)
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@ms.senai.br}
+      ADMIN_SENHA_PADRAO: ${ADMIN_SENHA_PADRAO:-admin123}
+      SEED_ADMIN: ${SEED_ADMIN:-true}
+      SESSAO_MINUTOS: ${SESSAO_MINUTOS:-480}
+      # SMTP para "Esqueci minha senha" (opcional — sem isto, o link vai ao log)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USUARIO: ${SMTP_USUARIO:-}
+      SMTP_SENHA: ${SMTP_SENHA:-}
+      SMTP_DE: ${SMTP_DE:-projeto-compras@ms.senai.br}
+      # SSO corporativo (Microsoft Entra ID / OIDC) — híbrido
+      OIDC_ENABLED: ${OIDC_ENABLED:-false}
+      OIDC_ISSUER: ${OIDC_ISSUER:-}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+      OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-}
+      OIDC_SPA_BASE: ${OIDC_SPA_BASE:-}
+      SECRET_KEY: ${SECRET_KEY:-}
+    volumes:
+      - compras-data:/data
+    # Sem porta publicada: só o nginx acessa (rede interna do compose).
+    # Para depurar a API direto, descomente:
+    # ports:
+    #   - "8000:8000"
+
+  web:
+    build: ./frontend
+    container_name: compras-web
+    restart: unless-stopped
+    # Sem porta publicada: o proxy (Caddy) fica na frente com TLS.
+    # Para depurar o nginx sem o proxy, descomente:
+    # ports:
+    #   - "8080:80"
+    depends_on:
+      - api
+
+  proxy:
+    image: caddy:2-alpine
+    container_name: compras-proxy
+    restart: unless-stopped
+    ports:
+      - "${PORTA_HTTP:-80}:80"
+      - "${PORTA_HTTPS:-443}:443"
+    environment:
+      DOMINIO: ${CADDY_DOMAIN:-localhost}
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data      # certificados (Let's Encrypt ou CA interna)
+      - caddy-config:/config
+    depends_on:
+      - web
+
+volumes:
+  compras-data:
+  caddy-data:
+  caddy-config:
