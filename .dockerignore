@@ -1,0 +1,12 @@
+# Ignorados no build do container único (contexto = raiz do projeto)
+.git/
+.gitignore
+*.md
+.env
+backend/.venv/
+backend/venv/
+backend/data/
+**/__pycache__/
+**/*.pyc
+frontend/img/README*
+anexos/

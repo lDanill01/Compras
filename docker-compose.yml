@@ -1,15 +1,32 @@
+# =============================================================================
+# CompraFlow — orquestração (container único de aplicação + proxy TLS)
+#   api:   FastAPI — serve a REST /api/* e a própria SPA (pasta frontend/)
+#   proxy: Caddy  — TLS automático (Let's Encrypt ou cert interno)
+# =============================================================================
+
 services:
   api:
-    build: ./backend
-    container_name: compras-api
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: compraflow-api
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     environment:
       DATA_DIR: /data
+      SPA_DIR: /srv/frontend
       # Conta administrativa (troque a senha no 1º login)
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@compraflow.com.br}
       ADMIN_SENHA_PADRAO: ${ADMIN_SENHA_PADRAO:-admin123}
       SEED_ADMIN: ${SEED_ADMIN:-true}
       SESSAO_MINUTOS: ${SESSAO_MINUTOS:-480}
+      DOMINIO_EMAIL: ${DOMINIO_EMAIL:-compraflow.com.br}
       # SMTP para "Esqueci minha senha" (opcional — sem isto, o link vai ao log)
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
@@ -24,27 +41,19 @@ services:
       OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-}
       OIDC_SPA_BASE: ${OIDC_SPA_BASE:-}
       SECRET_KEY: ${SECRET_KEY:-}
+      # Marca (white-label) — entregue em /api/config
+      PRODUTO_NOME: ${PRODUTO_NOME:-CompraFlow}
+      PRODUTO_COR_PRIMARIA: ${PRODUTO_COR_PRIMARIA:-#1B7A43}
     volumes:
-      - compras-data:/data
-    # Sem porta publicada: só o nginx acessa (rede interna do compose).
-    # Para depurar a API direto, descomente:
+      - compra-data:/data
+    # Sem porta publicada: só o proxy acessa (rede interna do compose).
+    # Para depurar a API/SPA direto, descomente:
     # ports:
     #   - "8000:8000"
 
-  web:
-    build: ./frontend
-    container_name: compras-web
-    restart: unless-stopped
-    # Sem porta publicada: o proxy (Caddy) fica na frente com TLS.
-    # Para depurar o nginx sem o proxy, descomente:
-    # ports:
-    #   - "8080:80"
-    depends_on:
-      - api
-
   proxy:
     image: caddy:2-alpine
-    container_name: compras-proxy
+    container_name: compraflow-proxy
     restart: unless-stopped
     ports:
       - "${PORTA_HTTP:-80}:80"
@@ -56,9 +65,10 @@ services:
       - caddy-data:/data      # certificados (Let's Encrypt ou CA interna)
       - caddy-config:/config
     depends_on:
-      - web
+      api:
+        condition: service_healthy
 
 volumes:
-  compras-data:
+  compra-data:
   caddy-data:
   caddy-config:

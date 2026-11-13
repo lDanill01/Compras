@@ -10,19 +10,20 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from . import config
 from .database import Base, engine
 from .seed import garantir_admin
 
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger("projeto-compras")
+log = logging.getLogger("compraflow")
 
 app = FastAPI(title="CompraFlow API", version="2.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # em produção atrás do nginx é same-origin
+    allow_origins=["*"],          # em produção é same-origin (SPA servida aqui)
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -38,8 +39,17 @@ def health():
     return {"ok": True, "data": {"status": "up", "version": app.version}}
 
 
+# --------------------------- SPA (container único) --------------------------
+# A pasta frontend/ é servida pelo próprio FastAPI em "/", depois das rotas
+# /api (a ordem de registro garante prioridade da API).
+if os.path.isdir(config.SPA_DIR):
+    app.mount("/", StaticFiles(directory=config.SPA_DIR, html=True), name="spa")
+    log.info("SPA servida de %s", config.SPA_DIR)
+else:
+    log.warning("SPA não encontrada em %s — só /api está disponível.", config.SPA_DIR)
+
+
 # ------------------------------ inicialização ------------------------------
-# Substitui inicializar() + criarGestorInicial() do Setup.gs (idempotente).
 
 def inicializar() -> None:
     os.makedirs(config.ANEXOS_DIR, exist_ok=True)

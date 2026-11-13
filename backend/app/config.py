@@ -12,6 +12,11 @@ DATA_DIR = os.environ.get("DATA_DIR", "/data")
 DB_URL = os.environ.get("DATABASE_URL", "sqlite:///" + os.path.join(DATA_DIR, "compras.db"))
 ANEXOS_DIR = os.environ.get("ANEXOS_DIR", os.path.join(DATA_DIR, "anexos"))
 
+# SPA servida pelo próprio backend (arquitetura de container único).
+# Padrão: pasta frontend/ irmã de backend/ (no Docker: /app/frontend).
+SPA_DIR = os.environ.get("SPA_DIR", os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "frontend"))
+
 # ---------------------------------------------------------------- sessão/admin
 SESSAO_MINUTOS = int(os.environ.get("SESSAO_MINUTOS", "480"))  # 8h
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@compraflow.com.br").strip().lower()
