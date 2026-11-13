@@ -1,4 +1,4 @@
-# proxy/Caddyfile — TLS automático na frente do nginx (SPA + /api).
+# proxy/Caddyfile — TLS automático na frente da API (container único).
 #
 # - CADDY_DOMAIN=localhost  → certificado interno (autoassinado), ideal p/ dev
 # - CADDY_DOMAIN=compras.suaempresa.com.br → Let's Encrypt (precisa do domínio
@@ -7,9 +7,9 @@
 # A variável DOMINIO é injetada pelo docker-compose (environment).
 
 {$DOMINIO} {
-	# Tudo (SPA estática e API) passa pelo nginx existente —
-	# o chain fica: cliente → caddy (TLS) → nginx → api.
-	reverse_proxy web:80
+	# SPA e /api são servidos pelo próprio FastAPI — o chain fica:
+	# cliente → caddy (TLS) → api (uvicorn).
+	reverse_proxy api:8000
 
 	# Logs de acesso no stdout do container (docker compose logs proxy)
 	log {

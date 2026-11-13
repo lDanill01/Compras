@@ -9,16 +9,15 @@ por variáveis de ambiente — **um `.env` define um cliente**.
 ```
                        ┌─ :80  (redirect)
 [compras-proxy Caddy] ─┤
-                       └─ :443 (TLS) ─► [compras-web nginx] ─► [compras-api FastAPI] ─► [volume compras-data]
-                                          SPA (pasta frontend/)  /api/{acao}              /data/compras.db
-                                          proxy /api/ ──────────┘                    /data/anexos/REQ-xxx/
+                       └─ :443 (TLS) ─► [compraflow-api FastAPI] ─► [volume compra-data]
+                                          SPA (pasta frontend/)      /data/compras.db
+                                          REST /api/* (mesmo app)    /data/anexos/REQ-xxx/
 ```
 
 | Componente | Papel |
 |---|---|
-| `compras-api` | FastAPI: regras de negócio, REST `/api/*`, banco SQLite e anexos no volume |
-| `compras-web` | nginx servindo a SPA (`frontend/`) e fazendo proxy de `/api/` para a API |
-| `compras-proxy` | Caddy: TLS automático (Let's Encrypt ou cert interno) |
+| `compraflow-api` | FastAPI: regras de negócio, REST `/api/*`, **serve a própria SPA**, banco SQLite e anexos no volume |
+| `compraflow-proxy` | Caddy: TLS automático (Let's Encrypt ou cert interno) |
 
 ## 1. Requisitos
 
@@ -117,10 +116,10 @@ Senhas legadas (SHA-256+salt) migram para bcrypt no 1º login; IDs
   **no servidor** (`backend/`).
 - Sessões: token de 8h na tabela `sessoes` (revogável); trocar senha
   invalida as demais sessões.
-- nginx limita `client_max_body_size 15m`; a API não fica exposta
-  diretamente (rede interna do compose).
+- O tamanho de anexos é validado no server (`ANEXO_MAX_BYTES`, 10 MB);
+  a API não fica exposta diretamente (rede interna do compose).
 - TLS termina no Caddy com renovação automática.
-- Backup: copie o volume `compras-data` (contém `compras.db` + `anexos/`).
+- Backup: copie o volume `compra-data` (contém `compras.db` + `anexos/`).
 
 ## 7. Free tiers possíveis para a fase inicial
 
