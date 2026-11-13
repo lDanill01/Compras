@@ -78,8 +78,8 @@ ROTAS["#/home"] = async function () {
   atualizarNav("#/home");
 
   /* paleta SENAI */
-  const azul = "#003876", azul2 = "#00529B", laranja = "#E84910";
-  const paleta = [azul, azul2, laranja, "#3b76b8", "#8aa9c9", "#f2917a", "#c24a24"];
+  const verde = "#1B7A43", verde2 = "#4CAF7D", acento = "#E67E22";
+  const paleta = [verde, verde2, acento, "#7BC496", "#A9D3B8", "#F3B27A", "#C56A15"];
 
   criarGrafico("#graficoMes", {
     type: "line",
@@ -88,7 +88,7 @@ ROTAS["#/home"] = async function () {
       datasets: [{
         label: "Requisições",
         data: d.por_mes.map((m) => m.total),
-        borderColor: azul, backgroundColor: "rgba(0,56,118,.12)",
+        borderColor: verde, backgroundColor: "rgba(27,122,67,.12)",
         tension: .35, fill: true,
       }],
     },
@@ -112,7 +112,7 @@ ROTAS["#/home"] = async function () {
     type: "bar",
     data: {
       labels: d.por_instituto.map((x) => x.instituto),
-      datasets: [{ label: "Requisições", data: d.por_instituto.map((x) => x.total), backgroundColor: azul2 }],
+      datasets: [{ label: "Requisições", data: d.por_instituto.map((x) => x.total), backgroundColor: verde2 }],
     },
     options: {
       indexAxis: "y",

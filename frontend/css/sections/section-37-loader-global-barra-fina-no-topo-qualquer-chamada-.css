@@ -17,7 +17,7 @@
     display: block;
     height: 100%;
     width: 32%;
-    background: linear-gradient(90deg, #00529B, #E84910);
+    background: linear-gradient(90deg, var(--cor-primaria-clara), var(--cor-accent));
     border-radius: 0 3px 3px 0;
     animation: loader-corre 1.1s ease-in-out infinite;
 }
@@ -53,7 +53,7 @@
     height: 18px;
     border-radius: 50%;
     border: 3px solid #dbe3ec;
-    border-top-color: #00529B;
+    border-top-color: var(--cor-primaria-clara);
     animation: girar 0.8s linear infinite;
 }
 

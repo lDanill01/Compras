@@ -25,7 +25,7 @@
     display: inline-block;
     min-width: 1.15rem;
     text-align: center;
-    background: #E84910;
+    background: var(--cor-accent);
     color: #fff;
     border-radius: 999px;
     font-size: 0.72rem;

@@ -111,8 +111,8 @@ ROTAS["#/performance"] = async function () {
       </div>
     </div>`;
 
-  const azul = "#003876", azul2 = "#00529B", laranja = "#E84910";
-  const paleta = [azul, azul2, laranja, "#3b76b8", "#8aa9c9", "#f2917a", "#c24a24"];
+  const verde = "#1B7A43", verde2 = "#4CAF7D", acento = "#E67E22";
+  const paleta = [verde, verde2, acento, "#7BC496", "#A9D3B8", "#F3B27A", "#C56A15"];
 
   /* ---- (1) faixa de filtros: expandir / fixar / recolher (padrão Requisições) ---- */
   const CHAVE_PERF_FIXADO = "compras.filtros.fixado.performance";
@@ -152,7 +152,7 @@ ROTAS["#/performance"] = async function () {
       labels: ["Em Análise", "Concluídas", "Canceladas"],
       datasets: [{
         data: [d.indicadores.em_analise, d.indicadores.concluida, d.indicadores.cancelada],
-        backgroundColor: [azul2, "#1E8E5A", "#64748B"],
+        backgroundColor: [verde2, "#1E8E5A", "#64748B"],
       }],
     },
     options: { plugins: { legend: { position: "bottom" } } },
@@ -162,7 +162,7 @@ ROTAS["#/performance"] = async function () {
     type: "bar",
     data: {
       labels: d.membros.map((m) => m.nome),
-      datasets: [{ label: "Atribuídas", data: d.membros.map((m) => m.atribuidas), backgroundColor: azul }],
+      datasets: [{ label: "Atribuídas", data: d.membros.map((m) => m.atribuidas), backgroundColor: verde }],
     },
     options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
   });

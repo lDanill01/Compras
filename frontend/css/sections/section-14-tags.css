@@ -15,7 +15,7 @@
 .urgencia-critica { background: #fecaca; color: #991b1b; }
 
 .status-aberta { background: #eef1f5; color: #475569; }
-.status-enviada { background: #e3edf7; color: #003876; }
+.status-enviada { background: var(--cor-primaria-soft, #E4F2EA); color: var(--cor-primaria); }
 .status-em_analise { background: #fdf1d6; color: #8a6a06; }
 .status-concluida { background: #1E8E5A; color: #fff; }
 .status-cancelada { background: #64748B; color: #fff; }

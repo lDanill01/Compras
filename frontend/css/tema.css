@@ -1,11 +1,15 @@
+/* tema.css — identidade visual do CompraFlow (white-label).
+ * Para personalizar um cliente, basta alterar (ou sobrescrever) este arquivo.
+ * Paleta padrão: verde corporativo + acento âmbar.
+ */
 :root {
-    /* Identidade SENAI (Sistema Indústria): azul institucional + detalhe laranja */
-    --cor-primaria: #003876;
-    --cor-primaria-clara: #00529B;
-    --cor-primaria-400: #3B7FC4;
-    --cor-accent: #E84910;
-    --cor-accent-dark: #B8380C;
-    --cor-accent-soft: #FCE9E0;
+    --cor-primaria: #1B7A43;
+    --cor-primaria-clara: #23965B;
+    --cor-primaria-400: #4CAF7D;
+    --cor-primaria-soft: #E4F2EA;
+    --cor-accent: #E67E22;
+    --cor-accent-dark: #C56A15;
+    --cor-accent-soft: #FDEBD8;
 
     --cor-texto: #1E2A38;
     --cor-muted: #64748B;
@@ -25,4 +29,3 @@
     --fonte: "Neo Sans Pro", "Mulish", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --fonte-titulo: "Neo Sans Pro", "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
-
