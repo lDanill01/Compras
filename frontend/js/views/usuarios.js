@@ -153,7 +153,7 @@ function modalNovoUsuario() {
           <p><label for="nu-nome">Nome completo</label>
             <input id="nu-nome" class="campo" required></p>
           <p><label for="nu-email">E-mail institucional</label>
-            <input id="nu-email" class="campo" placeholder="nome@ms.senai.br" required></p>
+            <input id="nu-email" class="campo" placeholder="nome@compraflow.com.br" required></p>
         </div>
         <div class="campo-duplo">
           <p><label for="nu-grupo">Perfil</label>
@@ -187,7 +187,7 @@ function modalNovoUsuario() {
   overlay.querySelector("#form-novo-usuario").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = overlay.querySelector("#nu-email").value.trim();
-    if (!eMailInstitucionalOk(email)) { mostrarMensagem("error", "Só é aceito e-mail institucional @ms.senai.br."); return; }
+    if (!eMailInstitucionalOk(email)) { mostrarMensagem("error", "Só é aceito e-mail institucional " + CONFIG.DOMINIO_EMAIL + "."); return; }
 
     const btn = overlay.querySelector('button[type="submit"]');
     btn.disabled = true; const rot = btn.innerHTML;

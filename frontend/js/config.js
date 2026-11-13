@@ -7,11 +7,11 @@
 const CONFIG = {
   API_URL: "",
 
-  /* Expiração da sessão (ms) — deve ser <= expiração definida no Apps Script */
+  /* Expiração da sessão (ms) — deve bater com SESSAO_MINUTOS do backend */
   SESSAO_MS: 8 * 60 * 60 * 1000,
 
-  /* Domínio institucional obrigatório */
-  DOMINIO_EMAIL: "@ms.senai.br",
+  /* Domínio institucional obrigatório (sobrescrito pelo /api/config no boot) */
+  DOMINIO_EMAIL: "@compraflow.com.br",
 
   /* Tamanho máximo de anexo (bytes) — deve bater com a validação server-side */
   ANEXO_MAX_BYTES: 10 * 1024 * 1024,
@@ -19,15 +19,15 @@ const CONFIG = {
   /* Extensões aceitas para anexos (validação client-side espelha a do server) */
   ANEXO_EXTENSOES: [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".png", ".jpg", ".jpeg", ".txt", ".zip"],
 
-  /* Ministérios/rótulos de instituto (cadastro e gráfico por instituto) */
+  /* Unidades/locais (cadastro e gráfico por unidade) — vem do backend */
   INSTITUTOS: [
-    "IST Alimentos e Bebidas - Dourados",
-    "ISI Biomassa - Três Lagoas",
-    "IST Eficiência Operacional - Campo Grande",
-    "SENAI MS - Departamento Regional",
+    "Unidade Central - Capital",
+    "Unidade Industrial - Distrito",
+    "Unidade Logística - Porto",
+    "Departamento Corporativo",
   ],
 
-  /* Modalidades RCA (igual ao Django: pedidos.models.Modalidade) */
+  /* Modalidades de compra (fonte de verdade: backend /api/config) */
   MODALIDADES: {
     selecao_com_disputa_aberta: "Seleção com Disputa (Aberta)",
     selecao_com_disputa_fechada: "Seleção com Disputa (Fechada)",
@@ -39,7 +39,7 @@ const CONFIG = {
     registro_preco: "Registro de Preço",
   },
 
-  /* Urgências (igual ao Django: pedidos.models.Urgencia) */
+  /* Níveis de urgência (fonte de verdade: backend /api/config) */
   URGENCIAS: {
     baixa: "Baixa",
     media: "Média",
@@ -47,7 +47,7 @@ const CONFIG = {
     critica: "Crítica",
   },
 
-  /* Status (igual ao Django: pedidos.models.Status) */
+  /* Status do fluxo (fonte de verdade: backend /api/config) */
   STATUS: {
     aberta: "Aberta",
     enviada: "Enviada",

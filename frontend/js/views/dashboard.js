@@ -77,7 +77,7 @@ ROTAS["#/home"] = async function () {
   qs("#dash-conteudo").hidden = false;
   atualizarNav("#/home");
 
-  /* paleta SENAI */
+  /* paleta CompraFlow */
   const verde = "#1B7A43", verde2 = "#4CAF7D", acento = "#E67E22";
   const paleta = [verde, verde2, acento, "#7BC496", "#A9D3B8", "#F3B27A", "#C56A15"];
 

@@ -171,5 +171,6 @@ def api_config(db: Session, payload: dict):
         "modalidades": config.MODALIDADES,
         "urgencias": config.URGENCIAS,
         "status": config.STATUS,
+        "dominio_email": config.DOMINIO_EMAIL,
         "sso": oidc.ativado(),
     }}

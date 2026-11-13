@@ -27,7 +27,7 @@
         <form id="form-login" class="formulario">
           <p>
             <label for="l-email">Usuário ou e-mail</label>
-            <input id="l-email" name="username" type="email" autofocus placeholder="nome@ms.senai.br" class="campo">
+            <input id="l-email" name="username" type="email" autofocus placeholder="nome@compraflow.com.br" class="campo">
           </p>
           <p>
             <label for="l-senha">Senha</label>
@@ -133,7 +133,7 @@
       <div class="cadastro-card">
         <h2>Cadastro de Usuário</h2>
         <p class="meta">Preencha seus dados. Aceitamos apenas e-mail institucional
-            <strong>@ms.senai.br</strong>.</p>
+            <strong>@compraflow.com.br</strong>.</p>
         <form id="form-cadastro" class="formulario">
           <p>
             <label for="c-nome">Nome completo</label>
@@ -141,7 +141,7 @@
           </p>
           <p>
             <label for="c-email">E-mail institucional</label>
-            <input id="c-email" class="campo" placeholder="nome@ms.senai.br" required>
+            <input id="c-email" class="campo" placeholder="nome@compraflow.com.br" required>
           </p>
           <div class="campo-duplo">
             <p>
@@ -188,7 +188,7 @@
       e.preventDefault();
       const email = val("c-email");
       if (!eMailInstitucionalOk(email)) {
-        mostrarMensagem("error", "Só é aceito e-mail institucional @ms.senai.br.");
+        mostrarMensagem("error", "Só é aceito e-mail institucional " + CONFIG.DOMINIO_EMAIL + ".");
         return;
       }
       if (val("c-senha1") !== val("c-senha2")) {
@@ -233,7 +233,7 @@
         <form id="form-esqueci" class="formulario">
           <p>
             <label for="e-email">E-mail institucional</label>
-            <input id="e-email" class="campo" placeholder="nome@ms.senai.br" required>
+            <input id="e-email" class="campo" placeholder="nome@compraflow.com.br" required>
           </p>
           <div class="modal-acoes">
             <button type="submit" class="botao"><i class="bi bi-envelope"></i> Enviar link</button>
@@ -246,7 +246,7 @@
       e.preventDefault();
       const email = overlay.querySelector("#e-email").value.trim();
       if (!eMailInstitucionalOk(email)) {
-        mostrarMensagem("error", "Só é aceito e-mail institucional @ms.senai.br.");
+        mostrarMensagem("error", "Só é aceito e-mail institucional " + CONFIG.DOMINIO_EMAIL + ".");
         return;
       }
       const btn = overlay.querySelector('button[type="submit"]');

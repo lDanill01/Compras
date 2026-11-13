@@ -33,6 +33,9 @@ document.addEventListener(API.EV_SESSAO_EXPIRADA, (e) => {
       CONFIG.MODALIDADES = resp.data.modalidades || CONFIG.MODALIDADES;
       CONFIG.URGENCIAS = resp.data.urgencias || CONFIG.URGENCIAS;
       CONFIG.STATUS = resp.data.status || CONFIG.STATUS;
+      if (resp.data.dominio_email) {
+        CONFIG.DOMINIO_EMAIL = "@" + resp.data.dominio_email;
+      }
     }
   } catch (e) { /* best-effort */ }
   await iniciarApp();
