@@ -6,7 +6,7 @@ services:
     environment:
       DATA_DIR: /data
       # Conta administrativa (troque a senha no 1º login)
-      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@ms.senai.br}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@compraflow.com.br}
       ADMIN_SENHA_PADRAO: ${ADMIN_SENHA_PADRAO:-admin123}
       SEED_ADMIN: ${SEED_ADMIN:-true}
       SESSAO_MINUTOS: ${SESSAO_MINUTOS:-480}
@@ -15,7 +15,7 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USUARIO: ${SMTP_USUARIO:-}
       SMTP_SENHA: ${SMTP_SENHA:-}
-      SMTP_DE: ${SMTP_DE:-projeto-compras@ms.senai.br}
+      SMTP_DE: ${SMTP_DE:-noreply@compraflow.com.br}
       # SSO corporativo (Microsoft Entra ID / OIDC) — híbrido
       OIDC_ENABLED: ${OIDC_ENABLED:-false}
       OIDC_ISSUER: ${OIDC_ISSUER:-}
