@@ -1,8 +1,8 @@
 """security.py — senhas e tokens.
 
-Substitui SHA-256(salt+senha) do Apps Script por bcrypt. Contas legadas
-(importadas da planilha) continuam autenticando pelo hash antigo e são
-re-hasheadas com bcrypt no primeiro login bem-sucedido.
+Senhas com bcrypt. Contas legadas (importadas por CSV) podem autenticar
+pelo hash antigo (salt + SHA-256) e são re-hasheadas com bcrypt no
+primeiro login bem-sucedido.
 """
 import base64
 import hashlib

@@ -34,7 +34,7 @@ def get_pedido(db: Session, numero: str) -> Pedido | None:
 
 
 def lead_time_dias(p: Pedido) -> int | None:
-    """Igual ao Django: dias entre envio e encerramento (ou hoje)."""
+    """Dias entre envio e encerramento (ou hoje, se ainda aberta)."""
     if not p.data_envio:
         return None
     envio = p.data_envio.replace(hour=0, minute=0, second=0, microsecond=0)

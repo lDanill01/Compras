@@ -1,4 +1,4 @@
-"""routers/agregacoes.py — port de Dashboard.gs, Performance.gs e Config.gs."""
+"""routers/agregacoes.py — agregações: dashboard, performance e config."""
 from datetime import datetime
 
 from sqlalchemy import select

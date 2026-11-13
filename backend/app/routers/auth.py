@@ -84,7 +84,7 @@ def api_cadastrar_usuario(db: Session, payload: dict):
     exigir(not senha2 or senha == senha2, "As senhas não coincidem.")
     exigir(not buscar_usuario(db, email), "Já existe uma conta para este e-mail.")
 
-    # Auto-registro entra sempre como solicitante (igual ao Django).
+    # Auto-registro entra sempre como solicitante.
     db.add(Usuario(
         nome_completo=nome,
         email=email,

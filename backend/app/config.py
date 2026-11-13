@@ -2,7 +2,8 @@
 config.py — configuração central da API (fonte de verdade para o frontend).
 
 Tudo configurável por variáveis de ambiente (docker-compose). Os mapas
-INSTITUTOS/MODALIDADES/URGENCIAS/STATUS espelham o Django e o Config.gs.
+INSTITUTOS/MODALIDADES/URGENCIAS/STATUS definem o domínio de negócio e
+também podem ser ajustados por cliente.
 """
 import os
 
@@ -12,13 +13,13 @@ DB_URL = os.environ.get("DATABASE_URL", "sqlite:///" + os.path.join(DATA_DIR, "c
 ANEXOS_DIR = os.environ.get("ANEXOS_DIR", os.path.join(DATA_DIR, "anexos"))
 
 # ---------------------------------------------------------------- sessão/admin
-SESSAO_MINUTOS = int(os.environ.get("SESSAO_MINUTOS", "480"))  # 8h, igual ao Apps Script
-ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@ms.senai.br").strip().lower()
+SESSAO_MINUTOS = int(os.environ.get("SESSAO_MINUTOS", "480"))  # 8h
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@compraflow.com.br").strip().lower()
 ADMIN_SENHA_PADRAO = os.environ.get("ADMIN_SENHA_PADRAO", "admin123")
 SEED_ADMIN = os.environ.get("SEED_ADMIN", "true").lower() != "false"
 
 # ---------------------------------------------------------------- e-mail institucional
-DOMINIO_EMAIL = os.environ.get("DOMINIO_EMAIL", "ms.senai.br")
+DOMINIO_EMAIL = os.environ.get("DOMINIO_EMAIL", "compraflow.com.br")
 
 # ---------------------------------------------------------------- anexos
 ANEXO_MAX_BYTES = int(os.environ.get("ANEXO_MAX_BYTES", str(10 * 1024 * 1024)))
@@ -47,15 +48,15 @@ SMTP_HOST = os.environ.get("SMTP_HOST", "")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
 SMTP_USUARIO = os.environ.get("SMTP_USUARIO", "")
 SMTP_SENHA = os.environ.get("SMTP_SENHA", "")
-SMTP_DE = os.environ.get("SMTP_DE", "projeto-compras@ms.senai.br")
+SMTP_DE = os.environ.get("SMTP_DE", "noreply@compraflow.com.br")
 SMTP_TLS = os.environ.get("SMTP_TLS", "true").lower() != "false"
 
-# ---------------------------------------------------------------- domínio de negócio (espelha Django/Config.gs)
+# ---------------------------------------------------------------- domínio de negócio
 INSTITUTOS = [
-    "IST Alimentos e Bebidas - Dourados",
-    "ISI Biomassa - Três Lagoas",
-    "IST Eficiência Operacional - Campo Grande",
-    "SENAI MS - Departamento Regional",
+    "Unidade Central - Capital",
+    "Unidade Industrial - Distrito",
+    "Unidade Logística - Porto",
+    "Departamento Corporativo",
 ]
 
 MODALIDADES = {

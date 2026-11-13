@@ -1,9 +1,9 @@
 """
-main.py — API "Projeto Compras" (FastAPI).
+main.py — API CompraFlow (FastAPI).
 
 Superfície única RESTful (app/rest.py): recursos no path, Bearer token e
-códigos HTTP corretos. Os "actions" legados do Apps Script foram removidos —
-o frontend fala REST por completo via adapter em frontend/js/api.js.
+códigos HTTP corretos. O frontend fala REST por completo via adapter em
+frontend/js/api.js.
 """
 import os
 import logging
@@ -18,7 +18,7 @@ from .seed import garantir_admin
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("projeto-compras")
 
-app = FastAPI(title="Projeto Compras API", version="2.1.0")
+app = FastAPI(title="CompraFlow API", version="2.1.0")
 
 app.add_middleware(
     CORSMiddleware,
