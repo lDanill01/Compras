@@ -47,6 +47,14 @@ OIDC_SCOPES = os.environ.get("OIDC_SCOPES", "openid profile email")
 # por boot se ausente — estados pendentes são invalidados a cada restart)
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
 
+# ---------------------------------------------------------------- CORS
+# A SPA é servida pela própria API (same-origin): CORS desligado por padrão.
+# Defina origens separadas por vírgula se consumir a API de outro endereço,
+# ex.: CORS_ORIGINS="https://portal.cliente.com.br"
+CORS_ORIGINS = [
+    o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()
+]
+
 # ---------------------------------------------------------------- reset de senha
 RESET_VALIDADE_MIN = int(os.environ.get("RESET_VALIDADE_MIN", "30"))
 SMTP_HOST = os.environ.get("SMTP_HOST", "")

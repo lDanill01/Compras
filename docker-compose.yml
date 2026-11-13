@@ -41,6 +41,9 @@ services:
       OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-}
       OIDC_SPA_BASE: ${OIDC_SPA_BASE:-}
       SECRET_KEY: ${SECRET_KEY:-}
+      # CORS — deixe vazio (same-origin); use origens separadas por vírgula
+      # se consumir a API de outro endereço
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
       # Marca (white-label) — entregue em /api/config
       PRODUTO_NOME: ${PRODUTO_NOME:-CompraFlow}
       PRODUTO_COR_PRIMARIA: ${PRODUTO_COR_PRIMARIA:-#1B7A43}

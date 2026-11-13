@@ -21,12 +21,14 @@ log = logging.getLogger("compraflow")
 
 app = FastAPI(title="CompraFlow API", version="2.1.0")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],          # em produção é same-origin (SPA servida aqui)
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Same-origin por padrão (SPA servida aqui). CORS só com origens externas.
+if config.CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=config.CORS_ORIGINS,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # Superfície RESTful — casos de uso do negócio (auth, pedidos, anexos,
 # usuários, agregações, reset).
