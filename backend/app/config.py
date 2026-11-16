@@ -6,6 +6,7 @@ INSTITUTOS/MODALIDADES/URGENCIAS/STATUS definem o domínio de negócio e
 também podem ser ajustados por cliente.
 """
 import os
+import re
 
 # ---------------------------------------------------------------- pastas/dados
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
@@ -54,6 +55,23 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "")
 CORS_ORIGINS = [
     o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()
 ]
+
+# ---------------------------------------------------------------- white-label (marca)
+# Identidade do cliente: entregue ao frontend em /api/config. A cor primária
+# gera toda a paleta no frontend (tema.css mantém o fallback padrão).
+
+def _cor_hex(valor: str, padrao: str) -> str:
+    """Normaliza '#RRGGBB'; cai no padrão se vier malformado."""
+    v = valor.strip()
+    if not re.fullmatch(r"#?[0-9a-fA-F]{6}", v):
+        return padrao
+    return ("#" + v.lstrip("#")).upper()
+
+PRODUTO_NOME = os.environ.get("PRODUTO_NOME", "").strip() or "CompraFlow"
+PRODUTO_COR_PRIMARIA = _cor_hex(os.environ.get("PRODUTO_COR_PRIMARIA", ""), "#1B7A43")
+# Logo alternativa por URL (opcional); por padrão o cliente monta seu próprio
+# arquivo em frontend/img/logo.svg (ver DEPLOY.md / CUSTOMIZACAO.md).
+PRODUTO_LOGO_URL = os.environ.get("PRODUTO_LOGO_URL", "").strip()
 
 # ---------------------------------------------------------------- reset de senha
 RESET_VALIDADE_MIN = int(os.environ.get("RESET_VALIDADE_MIN", "30"))

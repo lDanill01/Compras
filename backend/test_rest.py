@@ -10,6 +10,8 @@ tmp = tempfile.mkdtemp()
 os.environ["DATA_DIR"] = tmp
 os.environ["ANEXOS_DIR"] = os.path.join(tmp, "anexos")
 os.environ["SEED_ADMIN"] = "true"
+os.environ["PRODUTO_NOME"] = "FlowTest"
+os.environ["PRODUTO_COR_PRIMARIA"] = "#0aa1c2"  # minúscula: normalizada p/ maiúscula
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -154,6 +156,10 @@ with TestClient(app, raise_server_exceptions=False) as c:
     check("performance → 400 p/ não-gestão", r.status_code == 400)
     r = c.get(f"{B}/config")
     check("GET config público", r.status_code == 200 and "institutos" in r.json())
+    check("config entrega a marca (white-label)", r.json()["produto"] == {
+        "nome": "FlowTest", "cor_primaria": "#0AA1C2", "logo_url": ""},
+        str(r.json().get("produto")))
+    check("título da API usa a marca", app.title == "FlowTest API", app.title)
 
     print("— actions legados removidos (Task: degola) —")
     r = c.post(f"{B}/listarPedidos", json={"token": bia, "payload": {}})

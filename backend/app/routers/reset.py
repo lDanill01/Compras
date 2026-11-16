@@ -57,16 +57,17 @@ def api_solicitar_reset_senha(db: Session, payload: dict):
     link = (base + "#/redefinir/" + token) if base else token
 
     nome = u.nome_completo or email
-    assunto = "CompraFlow — redefinição de senha"
+    produto = config.PRODUTO_NOME
+    assunto = f"{produto} — redefinição de senha"
     corpo = (
         f"Olá, {nome}!\n\n"
-        "Recebemos um pedido de redefinição de senha da sua conta no CompraFlow.\n\n"
+        f"Recebemos um pedido de redefinição de senha da sua conta no {produto}.\n\n"
         + (f"Abra o link abaixo para definir uma nova senha:\n{link}\n\n"
            if base else
            f"Use este código para redefinir sua senha: {token}\n\n")
         + f"O link/código é válido por {config.RESET_VALIDADE_MIN} minutos.\n"
         "Se você não solicitou, ignore este e-mail.\n\n"
-        "Equipe CompraFlow"
+        f"Equipe {produto}"
     )
 
     if config.SMTP_HOST:

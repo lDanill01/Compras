@@ -19,7 +19,10 @@ from .seed import garantir_admin
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("compraflow")
 
-app = FastAPI(title="CompraFlow API", version="2.1.0")
+app = FastAPI(
+    title=f"{config.PRODUTO_NOME} API",
+    version="2.2.0",
+)
 
 # Same-origin por padrão (SPA servida aqui). CORS só com origens externas.
 if config.CORS_ORIGINS:

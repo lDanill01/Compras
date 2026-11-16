@@ -47,6 +47,7 @@ services:
       # Marca (white-label) — entregue em /api/config
       PRODUTO_NOME: ${PRODUTO_NOME:-CompraFlow}
       PRODUTO_COR_PRIMARIA: ${PRODUTO_COR_PRIMARIA:-#1B7A43}
+      PRODUTO_LOGO_URL: ${PRODUTO_LOGO_URL:-}
     volumes:
       - compra-data:/data
     # Sem porta publicada: só o proxy acessa (rede interna do compose).

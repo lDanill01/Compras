@@ -173,4 +173,9 @@ def api_config(db: Session, payload: dict):
         "status": config.STATUS,
         "dominio_email": config.DOMINIO_EMAIL,
         "sso": oidc.ativado(),
+        "produto": {
+            "nome": config.PRODUTO_NOME,
+            "cor_primaria": config.PRODUTO_COR_PRIMARIA,
+            "logo_url": config.PRODUTO_LOGO_URL,
+        },
     }}
