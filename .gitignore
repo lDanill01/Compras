@@ -18,6 +18,9 @@ anexos/
 branding/*
 !branding/LEIA-ME.md
 
+# Override local de desenvolvimento (porta HTTP da API)
+docker-compose.override.yml
+
 # Sistema
 .DS_Store
 node_modules/
