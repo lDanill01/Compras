@@ -11,7 +11,7 @@ let ORDENACAO = { campo: null, dir: 1 };
 
 /* Faixa de filtros: recolhida por padrão; "Fixar Menu" mantém expandida
  * (persistido em localStorage entre navegações e recarregamentos).
- * O comportamento é compartilhado — ver inicializarBarraFiltros (ui.js). */
+ * O comportamento é compartilhado — ver inicializarBarraFiltros (components/filtros.js). */
 const CHAVE_FILTROS_FIXADO = "compras.filtros.fixado";
 
 ROTAS["#/requisicoes"] = async function () {
