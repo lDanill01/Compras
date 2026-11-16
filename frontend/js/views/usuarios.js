@@ -153,7 +153,7 @@ function modalNovoUsuario() {
           <p><label for="nu-nome">Nome completo</label>
             <input id="nu-nome" class="campo" required></p>
           <p><label for="nu-email">E-mail institucional</label>
-            <input id="nu-email" class="campo" placeholder="nome@compraflow.com.br" required></p>
+            <input id="nu-email" class="campo" placeholder="nome${esc(CONFIG.DOMINIO_EMAIL)}" required></p>
         </div>
         <div class="campo-duplo">
           <p><label for="nu-grupo">Perfil</label>

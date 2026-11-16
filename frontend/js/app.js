@@ -36,6 +36,10 @@ document.addEventListener(API.EV_SESSAO_EXPIRADA, (e) => {
       if (resp.data.dominio_email) {
         CONFIG.DOMINIO_EMAIL = "@" + resp.data.dominio_email;
       }
+      if (resp.data.produto) {
+        Object.assign(CONFIG.PRODUTO, resp.data.produto);
+      }
+      aplicarMarca(); /* título + paleta, antes da 1ª renderização */
     }
   } catch (e) { /* best-effort */ }
   await iniciarApp();

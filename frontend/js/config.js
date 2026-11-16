@@ -55,4 +55,55 @@ const CONFIG = {
     concluida: "Concluída",
     cancelada: "Cancelada",
   },
+
+  /* Marca (white-label) — sobrescrita pelo /api/config no boot (app.js) */
+  PRODUTO: {
+    nome: "CompraFlow",
+    cor_primaria: "#1B7A43",
+    logo_url: "",
+  },
 };
+
+/* ------------------------------ marca (white-label) ----------------------- */
+
+const HEX_RE = /^#?[0-9a-fA-F]{6}$/;
+
+function _hexParaRgb(hex) {
+  const v = hex.replace("#", "");
+  return [0, 2, 4].map((i) => parseInt(v.slice(i, i + 2), 16));
+}
+
+/** Mistura o canal com branco (fator 0 = cor, 1 = branco). */
+function _clarear(hex, fator) {
+  return "#" + _hexParaRgb(hex)
+    .map((c) => Math.round(c + (255 - c) * fator))
+    .map((c) => c.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Aplica a marca em runtime, antes da primeira renderização:
+ * título da página + paleta derivada da cor primária (sobrescreve tema.css).
+ * Tons derivados: clara +18% · 400 +40% · soft +85% de mistura com branco.
+ */
+function aplicarMarca() {
+  const p = CONFIG.PRODUTO;
+  const cor = HEX_RE.test(p.cor_primaria) ? p.cor_primaria.toUpperCase() : "#1B7A43";
+  const st = document.createElement("style");
+  st.id = "tema-marca";
+  st.textContent =
+    `:root{--cor-primaria:${cor};` +
+    `--cor-primaria-clara:${_clarear(cor, 0.18)};` +
+    `--cor-primaria-400:${_clarear(cor, 0.40)};` +
+    `--cor-primaria-soft:${_clarear(cor, 0.85)};}`;
+  document.head.appendChild(st);
+
+  document.title = p.nome + " — Gestão de Requisições de Compra";
+  const fav = document.querySelector('link[rel="icon"]');
+  if (fav && p.logo_url) fav.href = p.logo_url;
+}
+
+/** Src do logo: URL do cliente ou o arquivo padrão (substituível por mount). */
+function srcLogo() {
+  return CONFIG.PRODUTO.logo_url || "img/logo.svg";
+}

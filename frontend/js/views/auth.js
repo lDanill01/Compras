@@ -10,7 +10,7 @@
           <div id="mensagens-flutuantes" hidden></div>
           ${html}
         </main>
-        <footer class="rodape-marca"><img src="img/logo.svg" alt="CompraFlow"></footer>
+        <footer class="rodape-marca"><img src="${srcLogo()}" alt="${esc(CONFIG.PRODUTO.nome)}"></footer>
       </div>`;
   }
 
@@ -27,7 +27,7 @@
         <form id="form-login" class="formulario">
           <p>
             <label for="l-email">Usuário ou e-mail</label>
-            <input id="l-email" name="username" type="email" autofocus placeholder="nome@compraflow.com.br" class="campo">
+            <input id="l-email" name="username" type="email" autofocus placeholder="nome${esc(CONFIG.DOMINIO_EMAIL)}" class="campo">
           </p>
           <p>
             <label for="l-senha">Senha</label>
@@ -133,7 +133,7 @@
       <div class="cadastro-card">
         <h2>Cadastro de Usuário</h2>
         <p class="meta">Preencha seus dados. Aceitamos apenas e-mail institucional
-            <strong>@compraflow.com.br</strong>.</p>
+            <strong>${esc(CONFIG.DOMINIO_EMAIL)}</strong>.</p>
         <form id="form-cadastro" class="formulario">
           <p>
             <label for="c-nome">Nome completo</label>
@@ -141,7 +141,7 @@
           </p>
           <p>
             <label for="c-email">E-mail institucional</label>
-            <input id="c-email" class="campo" placeholder="nome@compraflow.com.br" required>
+            <input id="c-email" class="campo" placeholder="nome${esc(CONFIG.DOMINIO_EMAIL)}" required>
           </p>
           <div class="campo-duplo">
             <p>
@@ -233,7 +233,7 @@
         <form id="form-esqueci" class="formulario">
           <p>
             <label for="e-email">E-mail institucional</label>
-            <input id="e-email" class="campo" placeholder="nome@compraflow.com.br" required>
+            <input id="e-email" class="campo" placeholder="nome${esc(CONFIG.DOMINIO_EMAIL)}" required>
           </p>
           <div class="modal-acoes">
             <button type="submit" class="botao"><i class="bi bi-envelope"></i> Enviar link</button>
