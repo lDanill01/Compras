@@ -1,0 +1,82 @@
+# CI do CompraFlow: 3 suítes Python + integra da SPA + smoke da imagem Docker.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependências
+        run: pip install -r backend/requirements.txt cryptography
+
+      - name: Suíte REST (regras + superfície)
+        run: python backend/test_rest.py
+
+      - name: Suíte importação CSV
+        run: python backend/test_import.py
+
+      - name: Suíte SSO (Entra ID/OIDC)
+        run: python backend/test_sso.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Adapter REST (api.js real contra API real)
+        run: |
+          (cd backend && python -m uvicorn app.main:app --port 8000 &) 
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/api/health >/dev/null && break
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:8000/api node backend/test_frontend_adapter.mjs
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Sintaxe de todos os scripts
+        run: |
+          falha=0
+          for f in $(find frontend/js -name '*.js' | sort); do
+            node --check "$f" || falha=1
+          done
+          exit $falha
+
+      - name: Integra da carga da SPA (tags de script × chamadas)
+        run: node frontend/verificar_carga.mjs
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build da imagem
+        run: docker build -f backend/Dockerfile -t compraflow:ci .
+
+      - name: Smoke da imagem (health + marca + SPA)
+        run: |
+          docker run -d --name ci -p 8123:8000 compraflow:ci
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8123/api/health >/dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8123/api/health | grep -q '"status":"up"'
+          curl -sf http://127.0.0.1:8123/api/config | grep -q '"produto"'
+          curl -sf http://127.0.0.1:8123/ | grep -q '<title>'
+          docker logs ci 2>&1 | tail -20
