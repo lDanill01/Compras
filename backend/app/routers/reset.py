@@ -20,7 +20,7 @@ from ..deps import (
 )
 from ..models import ResetSenha, Usuario
 
-log = logging.getLogger("projeto-compras")
+log = logging.getLogger("compraflow")
 
 
 def _resposta_padrao():

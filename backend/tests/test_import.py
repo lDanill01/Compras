@@ -20,7 +20,7 @@ os.environ["SEED_ADMIN"] = "true"
 os.environ["ADMIN_EMAIL"] = "admin@ms.senai.br"
 os.environ["DOMINIO_EMAIL"] = "ms.senai.br"
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # backend/ (tests/ um nível abaixo)
 
 from app.import_csv import importar  # noqa: E402
 

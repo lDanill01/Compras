@@ -6,7 +6,9 @@
  * Rodar: node backend/test_frontend_adapter.mjs
  */
 import fs from "node:fs";
+import path from "node:path";
 import vm from "node:vm";
+import { fileURLToPath } from "node:url";
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // cert interno do Caddy em dev
 
@@ -46,13 +48,17 @@ const ctx = {
 };
 ctx.window = ctx;
 vm.createContext(ctx);
+const raiz = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
+function lerArquivo(rel) { return fs.readFileSync(path.join(raiz, rel), "utf8"); }
+
 vm.runInContext(
-  fs.readFileSync("frontend/js/config.js", "utf8") +
+  lerArquivo("frontend/js/config.js") +
   `\nCONFIG.API_URL = ${JSON.stringify(BASE)};\n` +
-  fs.readFileSync("frontend/js/api.js", "utf8"), ctx);
+  lerArquivo("frontend/js/api.js"), ctx);
 
 const API = vm.runInContext("API", ctx);
 const Sessao = vm.runInContext("Sessao", ctx);
+const CONFIG = vm.runInContext("CONFIG", ctx);
 let falhas = 0;
 const check = (n, cond, extra = "") => {
   console.log(`${cond ? "✅" : "❌"} ${n} ${extra}`);
@@ -60,23 +66,28 @@ const check = (n, cond, extra = "") => {
 };
 
 const pdf = Buffer.from("%PDF-1.4 adapter").toString("base64");
-const USUARIO = "adapter@ms.senai.br";
+/* Contas alinhadas ao ambiente da API alvo (envs ADMIN_EMAIL/DOMINIO_EMAIL
+ * do stack). Padrão: domínio institucional default do CompraFlow. */
+const DOMINIO = process.env.TESTE_DOMINIO || "compraflow.com.br";
+const ADMIN = process.env.TESTE_ADMIN || `admin@${DOMINIO}`;
+const USUARIO = `adapter@${DOMINIO}`;
 const SENHA = "senha123";
 
 console.log("— fluxo completo via adapter REST (" + BASE + ") —");
 const cfg = await API.chamar("config");
 check("config pública", cfg.ok);
 
-const login = await API.chamar("login", { email: "admin@ms.senai.br", senha: "admin123" });
+const login = await API.chamar("login", { email: ADMIN, senha: "admin123" });
 check("login admin (REST)", login.ok, login.erro || "");
 Sessao.token = login.data.token;
 const adm = login.data.token;
 
 check("meusDados", (await API.chamar("meusDados")).ok);
 
+const instituto = process.env.TESTE_INSTITUTO || CONFIG.INSTITUTOS[0];
 const cad = await API.chamar("cadastrarUsuario", {
   email: USUARIO, nome_completo: "Ada Adapter", senha: SENHA, senha2: SENHA,
-  instituto: "ISI Biomassa - Três Lagoas",
+  instituto,
 });
 check("cadastrarUsuario (ou já existe de run anterior)",
   cad.ok || /existe/i.test(cad.erro || ""), cad.erro || "");

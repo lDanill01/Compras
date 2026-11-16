@@ -34,7 +34,7 @@ os.environ["OIDC_REDIRECT_URI"] = "https://localhost/api/auth/sso/callback"
 os.environ["OIDC_SPA_BASE"] = "https://localhost"
 os.environ["SECRET_KEY"] = "segredo-de-teste"
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # backend/ (tests/ um nível abaixo)
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa

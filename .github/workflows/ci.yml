@@ -20,13 +20,13 @@ jobs:
         run: pip install -r backend/requirements.txt cryptography
 
       - name: Suíte REST (regras + superfície)
-        run: python backend/test_rest.py
+        run: python backend/tests/test_rest.py
 
       - name: Suíte importação CSV
-        run: python backend/test_import.py
+        run: python backend/tests/test_import.py
 
       - name: Suíte SSO (Entra ID/OIDC)
-        run: python backend/test_sso.py
+        run: python backend/tests/test_sso.py
 
       - uses: actions/setup-node@v4
         with:
@@ -39,7 +39,7 @@ jobs:
             curl -sf http://127.0.0.1:8000/api/health >/dev/null && break
             sleep 1
           done
-          BASE_URL=http://127.0.0.1:8000/api node backend/test_frontend_adapter.mjs
+          BASE_URL=http://127.0.0.1:8000/api node frontend/tests/test_frontend_adapter.mjs
 
   frontend:
     runs-on: ubuntu-latest

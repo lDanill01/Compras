@@ -17,7 +17,9 @@ mesma origem). Nenhum framework, nenhum bundler.
 |---|---|
 | `index.html` | casca única + carregamento dos scripts |
 | `css/tema.css` | **identidade visual (variáveis CSS)** — personalização por cliente |
-| `css/sections/` | estilos por seção de tela |
+| `css/app.css` | tema consolidado da SPA (regras de tela/componentes) |
+| `verificar_carga.mjs` | guarda estática: tags de script × chamadas sem definição |
+| `tests/` | teste do adapter REST contra a API real |
 | `js/config.js` | constantes da SPA (sobrescritas em runtime pelo `/api/config`) |
 | `js/api.js` | adapter REST (`API.chamar`) + mapa de endpoints |
 | `js/sessao.js` · `js/sessao.js` | sessão local (token, expiração) |

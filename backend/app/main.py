@@ -8,6 +8,8 @@ frontend/js/api.js.
 import os
 import logging
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -19,9 +21,35 @@ from .seed import garantir_admin
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("compraflow")
 
+
+# ------------------------------ inicialização ------------------------------
+
+def inicializar() -> None:
+    os.makedirs(config.ANEXOS_DIR, exist_ok=True)
+    Base.metadata.create_all(engine)
+    if not config.SEED_ADMIN:
+        return
+    from .database import SessionLocal
+
+    db = SessionLocal()
+    try:
+        garantir_admin(db)
+    finally:
+        db.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    inicializar()
+    yield
+
+
+# --------------------------------- app --------------------------------------
+
 app = FastAPI(
     title=f"{config.PRODUTO_NOME} API",
     version="2.2.0",
+    lifespan=lifespan,
 )
 
 # Same-origin por padrão (SPA servida aqui). CORS só com origens externas.
@@ -52,24 +80,3 @@ if os.path.isdir(config.SPA_DIR):
     log.info("SPA servida de %s", config.SPA_DIR)
 else:
     log.warning("SPA não encontrada em %s — só /api está disponível.", config.SPA_DIR)
-
-
-# ------------------------------ inicialização ------------------------------
-
-def inicializar() -> None:
-    os.makedirs(config.ANEXOS_DIR, exist_ok=True)
-    Base.metadata.create_all(engine)
-    if not config.SEED_ADMIN:
-        return
-    from .database import SessionLocal
-
-    db = SessionLocal()
-    try:
-        garantir_admin(db)
-    finally:
-        db.close()
-
-
-@app.on_event("startup")
-def startup() -> None:
-    inicializar()

@@ -16,7 +16,7 @@ os.environ["DOMINIO_EMAIL"] = "ms.senai.br"
 os.environ["PRODUTO_NOME"] = "FlowTest"
 os.environ["PRODUTO_COR_PRIMARIA"] = "#0aa1c2"  # minúscula: normalizada p/ maiúscula
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # backend/ (tests/ um nível abaixo)
 
 from fastapi.testclient import TestClient  # noqa: E402
 

@@ -19,21 +19,27 @@ backend/                 # API FastAPI + SPA servida
 │   ├── security.py      # senhas (bcrypt) e sessões
 │   ├── storage.py       # anexos em disco (abstração p/ S3/R2 futuramente)
 │   ├── oidc.py          # SSO corporativo (Microsoft Entra ID / OIDC)
+│   ├── import_csv.py    # CLI de migração de dados legados (CSV)
 │   └── seed.py          # admin inicial idempotente
+├── tests/               # suítes standalone (REST, importação, SSO)
 ├── requirements.txt
 └── Dockerfile
 
 frontend/                # SPA (vanilla JS, sem build step)
 ├── index.html
-├── css/                 # tema + seções (variáveis CSS p/ white-label)
-├── js/                  # config, sessão, api, roteador e views
+├── css/                 # tema.css (variáveis white-label) + app.css (tema consolidado)
+├── img/
+├── js/                  # config, sessão, api, components/, router e views/
+├── tests/               # teste do adapter REST contra a API real
+├── verificar_carga.mjs  # guarda estática (tags de script × chamadas)
 └── README.md
 
+branding/                # marca por cliente (logo/favicon; não versionado)
 proxy/Caddyfile          # TLS/HTTPS opcional na frente do container
 docker-compose.yml       # orquestração (api + proxy)
+.github/workflows/ci.yml # CI: suítes Python + integra da SPA + smoke Docker
 DEPLOY.md                # GUIA COMPLETO DE IMPLANTAÇÃO POR CLIENTE
 CUSTOMIZACAO.md          # identidade visual por cliente (white-label)
-branding/                # logo/favicon do cliente (não versionado; LEIA-ME)
 .env.example             # variáveis de ambiente (um .env = um cliente)
 ```
 

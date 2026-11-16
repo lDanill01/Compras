@@ -5,7 +5,6 @@
 .env
 backend/.venv/
 backend/venv/
-backend/data/
 **/__pycache__/
 **/*.pyc
 frontend/img/README*

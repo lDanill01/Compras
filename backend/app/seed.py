@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from . import config, security
 from .models import Usuario
 
-log = logging.getLogger("projeto-compras")
+log = logging.getLogger("compraflow")
 
 
 def garantir_admin(db: Session) -> bool:
