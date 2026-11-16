@@ -10,6 +10,9 @@ tmp = tempfile.mkdtemp()
 os.environ["DATA_DIR"] = tmp
 os.environ["ANEXOS_DIR"] = os.path.join(tmp, "anexos")
 os.environ["SEED_ADMIN"] = "true"
+# Contas de teste em @ms.senai.br: alinha admin e domínio institucional.
+os.environ["ADMIN_EMAIL"] = "admin@ms.senai.br"
+os.environ["DOMINIO_EMAIL"] = "ms.senai.br"
 os.environ["PRODUTO_NOME"] = "FlowTest"
 os.environ["PRODUTO_COR_PRIMARIA"] = "#0aa1c2"  # minúscula: normalizada p/ maiúscula
 

@@ -1,11 +1,11 @@
-/* Camada de comunicação com a API (FastAPI, container Docker).
+/* Camada de comunicação com a API (FastAPI, container único).
  *
- * TRANSPORTE: fetch direto para /api/{acao} (mesma origem, via proxy do nginx).
- * Substitui a Bridge (iframe + postMessage) do Apps Script — sem CORS,
- * sem redirect e com latência de rede local.
+ * TRANSPORTE: fetch direto para os recursos REST /api/* (mesma origem — a
+ * própria API serve a SPA; o Caddy só termina o TLS). As views continuam
+ * falando "ações" (API.chamar) e o mapa REST_MAP traduz para o recurso.
  *
- * Protocolo: POST {token, payload} → envelope {ok, data|erro} (idêntico ao
- * antigo Apps Script, então as views não mudaram).
+ * Protocolo: envelope {ok, data|erro} — o adapter traduz os códigos HTTP
+ * (400 regra de negócio, 401 sessão, 404 não achado).
  */
 const API = (() => {
   /** Evento para "sessão expirou" (o app ouve e volta ao login). */
@@ -98,9 +98,9 @@ const API = (() => {
     return u ? u.replace(/\/+$/, "") : "/api";
   }
 
-  /* Mapa ação → REST (Task 3). As views continuam chamando API.chamar(acao,
-   * payload); este adaptador converte para endpoints RESTful com Bearer.
-   * Ações fora do mapa caem no endpoint legado POST /api/{acao}. */
+  /* Mapa ação → REST. As views continuam chamando API.chamar(acao, payload);
+   * este adaptador converte para endpoints RESTful com Bearer. Ação fora do
+   * mapa é rejeitada localmente ("Ação desconhecida"). */
   function enc(v) { return encodeURIComponent(String(v ?? "")); }
   function montarQuery(p) {
     const partes = Object.entries(p || {})

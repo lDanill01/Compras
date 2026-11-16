@@ -32,6 +32,8 @@ frontend/                # SPA (vanilla JS, sem build step)
 proxy/Caddyfile          # TLS/HTTPS opcional na frente do container
 docker-compose.yml       # orquestração (api + proxy)
 DEPLOY.md                # GUIA COMPLETO DE IMPLANTAÇÃO POR CLIENTE
+CUSTOMIZACAO.md          # identidade visual por cliente (white-label)
+branding/                # logo/favicon do cliente (não versionado; LEIA-ME)
 .env.example             # variáveis de ambiente (um .env = um cliente)
 ```
 

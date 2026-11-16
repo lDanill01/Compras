@@ -44,9 +44,15 @@ Acesse `https://SEU-DOMINIO`. Login inicial da Gestão:
 | `ADMIN_SENHA_PADRAO` | `admin123` | Trocar em produção |
 | `SEED_ADMIN` | `true` | Criar admin no 1º boot |
 | `SESSAO_MINUTOS` | `480` | Duração da sessão |
+| `PRODUTO_NOME` | `CompraFlow` | Marca: título, sidebar, e-mails |
+| `PRODUTO_COR_PRIMARIA` | `#1B7A43` | Marca: cor primária (gera a paleta) |
+| `PRODUTO_LOGO_URL` | vazio | Marca: logo por URL (opcional; padrão é mount em `branding/`) |
 | `SMTP_*` | vazio | "Esqueci minha senha"; sem SMTP o link vai ao log |
 | `SECRET_KEY` | — | Assinatura do state do SSO (gerar string longa) |
 | `OIDC_*` | `false` | SSO Microsoft Entra (seção abaixo) |
+
+Identidade visual completa (logo por mount, regras de contraste, checklist
+por cliente): **[`CUSTOMIZACAO.md`](CUSTOMIZACAO.md)**.
 
 ## 3. SSO corporativo — Microsoft Entra ID (opcional, híbrido)
 

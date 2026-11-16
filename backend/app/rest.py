@@ -1,13 +1,12 @@
 """
-rest.py — superfície RESTful da API (Task 3).
+rest.py — superfície RESTful da API.
 
-Os "actions" legados (POST /api/{acao}, envelope {ok,data,erro}) continuam
-funcionando para compatibilidade; este módulo expõe os MESMOS casos de uso
-com semântica REST: recursos no path, Bearer token no header Authorization
-e códigos HTTP corretos (400 regra de negócio, 401 sessão, 404 não achado).
+Este módulo expõe todos os casos de uso com semântica REST: recursos no
+path, Bearer token no header Authorization e códigos HTTP corretos
+(400 regra de negócio, 401 sessão, 404 não achado).
 
-IMPORTANTE: este router deve ser registrado ANTES do catch-all
-POST /api/{acao} no main.py (ordem de registro = prioridade de rota).
+A lógica de negócio mora em routers/ e responde em envelope
+{ok, data|erro}; _rodar() traduz esse envelope para HTTP.
 """
 import base64
 import re
