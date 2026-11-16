@@ -50,6 +50,10 @@ services:
       PRODUTO_LOGO_URL: ${PRODUTO_LOGO_URL:-}
     volumes:
       - compra-data:/data
+      # Logo próprio do cliente (white-label): substitui o padrão sem tocar
+      # no código. Basta criar ./branding/logo.svg (e favicon.svg, opcional):
+      # - ./branding/logo.svg:/srv/frontend/img/logo.svg:ro
+      # - ./branding/favicon.svg:/srv/frontend/img/favicon.svg:ro
     # Sem porta publicada: só o proxy acessa (rede interna do compose).
     # Para depurar a API/SPA direto, descomente:
     # ports:

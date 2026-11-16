@@ -14,6 +14,10 @@ backend/data/
 # Anexos de usuarios (nunca versionar)
 anexos/
 
+# Marca por cliente (white-label) — só o LEIA-ME fica versionado
+branding/*
+!branding/LEIA-ME.md
+
 # Sistema
 .DS_Store
 node_modules/
