@@ -110,6 +110,13 @@ SMTP_USUARIO = os.environ.get("SMTP_USUARIO", "")
 SMTP_SENHA = os.environ.get("SMTP_SENHA", "")
 SMTP_DE = os.environ.get("SMTP_DE", "noreply@compraflow.com.br")
 SMTP_TLS = os.environ.get("SMTP_TLS", "true").lower() != "false"
+# Base dos links enviados por e-mail (ex.: https://compras.cliente.com.br).
+# O base_url informado pelo cliente só é aceito se a origem for esta ou uma
+# das CORS_ORIGINS — evita links de reset apontando para domínio de terceiro.
+APP_BASE_URL = os.environ.get("APP_BASE_URL", "").strip()
+# Sem SMTP, registra o link de reset no log do container. APENAS dev/homolog:
+# em produção configure SMTP_HOST (e mantenha isto em false).
+RESET_TOKEN_EM_LOG = os.environ.get("RESET_TOKEN_EM_LOG", "false").lower() == "true"
 
 # ---------------------------------------------------------------- domínio de negócio
 INSTITUTOS = [

@@ -47,12 +47,24 @@ Acesse `https://SEU-DOMINIO`. Login inicial da Gestão:
 | `PRODUTO_NOME` | `CompraFlow` | Marca: título, sidebar, e-mails |
 | `PRODUTO_COR_PRIMARIA` | `#1B7A43` | Marca: cor primária (gera a paleta) |
 | `PRODUTO_LOGO_URL` | vazio | Marca: logo por URL (opcional; padrão é mount em `branding/`) |
-| `SMTP_*` | vazio | "Esqueci minha senha"; sem SMTP o link vai ao log |
+| `SMTP_*` | vazio | "Esqueci minha senha"; em produção, `SMTP_HOST` é obrigatório |
+| `APP_BASE_URL` | vazio | Base dos links de e-mail (reset); sem ela, links vêm sem URL |
+| `RESET_TOKEN_EM_LOG` | `false` | Registrar link de reset no log — apenas dev/homolog |
 | `SECRET_KEY` | — | Assinatura do state do SSO (gerar string longa) |
 | `OIDC_*` | `false` | SSO Microsoft Entra (seção abaixo) |
 
 Identidade visual completa (logo por mount, regras de contraste, checklist
 por cliente): **[`CUSTOMIZACAO.md`](CUSTOMIZACAO.md)**.
+
+### SMTP e reset de senha
+
+Em produção, configure `SMTP_HOST` (e credenciais `SMTP_*`): sem SMTP, o
+e-mail de redefinição **não é enviado** — com `RESET_TOKEN_EM_LOG=true` o
+link aparece no log do container (útil apenas em dev/homolog). A base dos
+links é `APP_BASE_URL` (ex.: `https://compras.cliente.com.br`); um
+`base_url` informado pelo cliente só é aceito se coincidir com essa origem
+ou com `CORS_ORIGINS`. Redefinir a senha encerra todas as sessões abertas
+daquela conta.
 
 ## 3. SSO corporativo — Microsoft Entra ID (opcional, híbrido)
 

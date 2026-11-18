@@ -16,6 +16,10 @@ os.environ.pop("SECRET_KEY", None)
 os.environ["RATE_LIMIT_TENTATIVAS"] = "3"
 os.environ["RATE_LIMIT_JANELA_MIN"] = "15"
 os.environ["ADMIN_SENHA_VALIDADE_DIAS"] = "1"
+# Task 3: reset de senha — base do servidor fixa; SMTP vazio; token em log off.
+os.environ["APP_BASE_URL"] = "https://compras.ms.senai.br"
+os.environ["SMTP_HOST"] = ""
+os.environ.pop("RESET_TOKEN_EM_LOG", None)
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # backend/
 
@@ -87,6 +91,63 @@ with TestClient(app, raise_server_exceptions=False) as c:
     msg = r.text
     check("mensagem fala de senha provisória", "senha provisória" in msg, msg[:80])
     check("mensagem NÃO casa com MSG_SESSAO", "sessão expirada" not in msg.lower())
+
+print("— reset de senha (Task 3) —")
+import logging as _logging
+import re as _re
+from unittest import mock as _mock
+
+config.RESET_TOKEN_EM_LOG = False  # monkeypatch de config é lido a cada chamada
+config.RATE_LIMIT_TENTATIVAS = 100
+log_reset = _logging.getLogger("compraflow")
+
+with TestClient(app, raise_server_exceptions=False) as c:
+    B = "/api"
+    rate_limit.limpar()
+
+    r = c.post(f"{B}/auth/cadastro", json={
+        "email": "bia@compraflow.com.br", "nome_completo": "Bia Teste",
+        "senha": "senha123", "senha2": "senha123"})
+    check("cadastro bia 201", r.status_code == 201, str(r.status_code))
+    r = c.post(f"{B}/auth/login", json={
+        "email": "bia@compraflow.com.br", "senha": "senha123"})
+    check("login bia 200", r.status_code == 200 and "token" in r.json(),
+          str(r.status_code))
+    token_bia = r.json()["token"]
+
+    # 1) base_url do cliente é ignorada; sem SMTP e sem RESET_TOKEN_EM_LOG,
+    #    nada do link vai para o log
+    with _mock.patch.object(log_reset, "info") as mi, \
+            _mock.patch.object(log_reset, "warning") as mw:
+        r = c.post(f"{B}/auth/reset/solicitar", json={
+            "email": "bia@compraflow.com.br", "base_url": "https://evil.com"})
+        check("solicitar reset 200", r.status_code == 200, str(r.status_code))
+        textos = " ".join(
+            " ".join(map(str, ca.args))
+            for ch in (mi, mw) for ca in ch.call_args_list)
+        check("evil.com não aparece no log", "evil.com" not in textos)
+        check("link não vai ao log (RESET_TOKEN_EM_LOG=false)",
+              "#/redefinir/" not in textos)
+
+    # 2) com RESET_TOKEN_EM_LOG=True (dev/homolog), o link aparece — com a
+    #    base do SERVIDOR, não a do cliente
+    config.RESET_TOKEN_EM_LOG = True
+    with _mock.patch.object(log_reset, "info") as mi:
+        r = c.post(f"{B}/auth/reset/solicitar", json={
+            "email": "bia@compraflow.com.br", "base_url": "https://evil.com"})
+        textos = " ".join(" ".join(map(str, ca.args)) for ca in mi.call_args_list)
+        check("log mostra o link", "#/redefinir/" in textos, textos[:100])
+        m = _re.search(r"#/redefinir/([0-9a-f]+)", textos)
+        check("base do link é a do servidor",
+              bool(m) and "https://compras.ms.senai.br#/redefinir/" in textos)
+    token_reset = m.group(1) if m else ""
+
+    # 3) redefinir senha mata as sessões anteriores do e-mail
+    r = c.post(f"{B}/auth/reset/redefinir", json={
+        "token": token_reset, "senha": "novasenha1", "senha2": "novasenha1"})
+    check("redefinir 200", r.status_code == 200, str(r.status_code))
+    r = c.get(f"{B}/me", headers={"Authorization": f"Bearer {token_bia}"})
+    check("sessão antiga morreu → 401", r.status_code == 401, str(r.status_code))
 
 print()
 if falhas:

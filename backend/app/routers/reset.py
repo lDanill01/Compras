@@ -6,6 +6,7 @@ no log do container (útil para dev/homolog).
 import logging
 import smtplib
 from email.message import EmailMessage
+from urllib.parse import urlsplit
 
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
@@ -18,7 +19,7 @@ from ..deps import (
     exigir_email_institucional,
     is_valido,
 )
-from ..models import ResetSenha, Usuario
+from ..models import ResetSenha, Sessao, Usuario
 
 log = logging.getLogger("compraflow")
 
@@ -28,6 +29,25 @@ def _resposta_padrao():
         "mensagem": "Se existir uma conta com este e-mail, enviaremos as "
                     "instruções de redefinição.",
     }}
+
+
+def _base_permitido(cliente: str) -> str:
+    """Base dos links de redefinição — decidida no servidor.
+
+    APP_BASE_URL (env do servidor) tem prioridade. Sem ela, o base_url do
+    cliente só é aceito se a origem (scheme://netloc) constar de
+    APP_BASE_URL ∪ CORS_ORIGINS. Caso contrário, '' (o e-mail traz só o
+    código) — nunca um domínio escolhido por quem chama a API.
+    """
+    if config.APP_BASE_URL:
+        return config.APP_BASE_URL.rstrip("/")
+    permitidas = {config.APP_BASE_URL.rstrip("/")}
+    for origem in config.CORS_ORIGINS:
+        p = urlsplit(origem)
+        permitidas.add(f"{p.scheme}://{p.netloc}")
+    p = urlsplit(str(cliente or "").split("#")[0])
+    origem_cliente = f"{p.scheme}://{p.netloc}"
+    return origem_cliente if origem_cliente in permitidas else ""
 
 
 def api_solicitar_reset_senha(db: Session, payload: dict):
@@ -53,7 +73,7 @@ def api_solicitar_reset_senha(db: Session, payload: dict):
                       usado=False, criado_em=security.agora()))
     db.commit()
 
-    base = str(payload.get("base_url") or "").split("#")[0]
+    base = _base_permitido(payload.get("base_url"))
     link = (base + "#/redefinir/" + token) if base else token
 
     nome = u.nome_completo or email
@@ -75,8 +95,13 @@ def api_solicitar_reset_senha(db: Session, payload: dict):
             _enviar_email(email, assunto, corpo)
         except Exception as e:
             log.warning("Falha ao enviar e-mail de reset: %s", e)
-    else:
+    elif config.RESET_TOKEN_EM_LOG:
         log.info("SMTP não configurado — link de reset para %s: %s", email, link)
+    else:
+        log.warning(
+            "SMTP não configurado e RESET_TOKEN_EM_LOG=false — o e-mail de "
+            "redefinição não pôde ser enviado. Configure SMTP_HOST "
+            "(produção) ou RESET_TOKEN_EM_LOG=true (apenas dev/homolog).")
 
     return _resposta_padrao()
 
@@ -102,6 +127,8 @@ def api_redefinir_senha(db: Session, payload: dict):
 
     alvo.salt = ""
     alvo.senha_hash = security.hash_bcrypt(senha)
+    # Redefinir a senha mata TODAS as sessões do e-mail (inclusive a atual).
+    db.execute(delete(Sessao).where(Sessao.email == email))
     r.usado = True
     db.commit()
     return {"ok": True, "data": {"email": email,
