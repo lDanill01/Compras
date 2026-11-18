@@ -37,11 +37,14 @@ jobs:
 
       - name: Adapter REST (api.js real contra API real)
         run: |
-          (cd backend && python -m uvicorn app.main:app --port 8000 &) 
+          # DATA_DIR temporário: sem ele o uvicorn tenta criar /data e morre
+          DATA_DIR=$(mktemp -d)
+          (cd backend && DATA_DIR=$DATA_DIR python -m uvicorn app.main:app --port 8000 &)
           for i in $(seq 1 30); do
             curl -sf http://127.0.0.1:8000/api/health >/dev/null && break
             sleep 1
           done
+          curl -sf http://127.0.0.1:8000/api/health
           BASE_URL=http://127.0.0.1:8000/api node frontend/tests/test_frontend_adapter.mjs
 
   frontend:
