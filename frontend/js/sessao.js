@@ -25,12 +25,14 @@ const Sessao = (() => {
   }
 
   function gravar({ token, email, nome, grupo }) {
-    const atual = ler() || {};
     localStorage.setItem(
       CHAVE,
       JSON.stringify({
-        // token: mantém o de uma sessão anterior (compat), se houver
-        token: token ?? atual.token,
+        // token: só o que veio NESTA gravação. Um login novo DESCARTA o token
+        // antigo — a resposta já setou o cookie httpOnly que passa a valer;
+        // herdar token morto fazia o Bearer preferido pelo servidor falhar
+        // mesmo com o cookie novo válido.
+        token,
         email,
         nome,
         grupo,

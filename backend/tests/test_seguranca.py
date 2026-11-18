@@ -8,6 +8,7 @@ import os
 import stat
 import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 
 tmp = tempfile.mkdtemp()
 os.environ["DATA_DIR"] = tmp
@@ -183,6 +184,66 @@ with TestClient(app, raise_server_exceptions=False) as c:
     check("logout apaga o cookie", "cf_sessao=" in setc_logout)
     r = c.get(f"{B}/me")
     check("/me após logout → 401", r.status_code == 401, str(r.status_code))
+
+print("— passe de correção (revisão final) —")
+with TestClient(app, raise_server_exceptions=False) as c:
+    B = "/api"
+    config.RATE_LIMIT_TENTATIVAS = 3
+
+    # (C1) logins CORRETOS não consomem o orçamento do rate limit
+    with open(os.path.join(tmp, "admin_seed_em"), "w") as f:
+        f.write(security.agora().isoformat())
+    rate_limit.limpar()
+    bloq = False
+    for _ in range(5):
+        r = c.post(f"{B}/auth/login", json={"email": EMAIL_ADMIN, "senha": "admin123"})
+        if r.status_code == 429:
+            bloq = True
+            break
+    check("5 logins corretos não bloqueiam", not bloq,
+          f"último={r.status_code}")
+
+    # (I3) conta NÃO-admin com senha "admin123" não entra no bloqueio do admin
+    r = c.post(f"{B}/auth/cadastro", json={
+        "email": "carla@compraflow.com.br", "nome_completo": "Carla",
+        "senha": "admin123", "senha2": "admin123"})
+    check("cadastro carla 201", r.status_code == 201, str(r.status_code))
+    semente = (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=2))
+    with open(os.path.join(tmp, "admin_seed_em"), "w") as f:
+        f.write(semente.isoformat())
+    r = c.post(f"{B}/auth/login", json={
+        "email": "carla@compraflow.com.br", "senha": "admin123"})
+    check("não-admin com senha admin123 → 200", r.status_code == 200,
+          str(r.status_code))
+
+    # (I4) sem APP_BASE_URL, base_url de MESMA origem do servidor é aceita
+    config.APP_BASE_URL = ""
+    with _mock.patch.object(log_reset, "info") as mi:
+        r = c.post(f"{B}/auth/reset/solicitar",
+                   json={"email": "carla@compraflow.com.br",
+                         "base_url": "http://testserver/"},
+                   headers={"Host": "testserver"})
+        textos = " ".join(" ".join(map(str, ca.args)) for ca in mi.call_args_list)
+    check("base_url de mesma origem aceita (default deploy)",
+          "http://testserver#/redefinir/" in textos, textos[:80])
+
+    # (I5) logout com Bearer morto + cookie válido: 200, cookie sai, sessão morre
+    config.RATE_LIMIT_TENTATIVAS = 100
+    # janela da senha provisória reaberta para o admin logar
+    with open(os.path.join(tmp, "admin_seed_em"), "w") as f:
+        f.write(security.agora().isoformat())
+    c.cookies.clear()
+    r = c.post(f"{B}/auth/login", json={"email": EMAIL_ADMIN, "senha": "admin123"})
+    check("login para teste de logout 200", r.status_code == 200, str(r.status_code))
+    r = c.post(f"{B}/auth/logout",
+               headers={"Authorization": "Bearer token-inexistente"})
+    check("logout com Bearer morto + cookie → 200", r.status_code == 200,
+          str(r.status_code))
+    setc_logout = (r.headers.get("set-cookie") or "").lower()
+    check("logout apaga o cookie mesmo com Bearer morto", "cf_sessao=" in setc_logout)
+    r = c.get(f"{B}/me")
+    check("sessão do cookie morreu após logout → 401", r.status_code == 401,
+          str(r.status_code))
 
 print()
 if falhas:

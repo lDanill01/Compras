@@ -8,6 +8,7 @@ from .. import config, security
 from ..deps import (
     ErroNegocio,
     buscar_usuario,
+    eh_admin,
     exigir,
     exigir_email_institucional,
     is_valido,
@@ -45,9 +46,10 @@ def api_login(db: Session, payload: dict):
 
     token = security.novo_token()
 
-    # Bloqueio da senha provisória do admin: fora da janela de carência
-    # (env ADMIN_SENHA_VALIDADE_DIAS; 0 desativa), a senha padrão é recusada.
-    senha_padrao = security.verificar_senha(
+    # Bloqueio da senha provisória do ADMIN (apenas a conta administrativa):
+    # fora da janela de carência (env ADMIN_SENHA_VALIDADE_DIAS; 0 desativa),
+    # a senha padrão é recusada.
+    senha_padrao = eh_admin(email) and security.verificar_senha(
         config.ADMIN_SENHA_PADRAO, u.senha_hash, u.salt
     )
     if senha_padrao and config.ADMIN_SENHA_VALIDADE_DIAS > 0:

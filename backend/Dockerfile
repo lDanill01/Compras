@@ -14,4 +14,8 @@ COPY backend/app ./app
 COPY frontend ./frontend
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# --proxy-headers: atrás do Caddy, o cliente real vem de X-Forwarded-For/X-Proto.
+# A CONFIANÇA é definida por FORWARDED_ALLOW_IPS (env; default do uvicorn é
+# 127.0.0.1) — o docker-compose aponta só para a rede interna, nunca "*".
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", \
+     "--proxy-headers"]

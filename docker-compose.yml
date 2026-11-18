@@ -58,6 +58,10 @@ services:
       PRODUTO_NOME: ${PRODUTO_NOME:-CompraFlow}
       PRODUTO_COR_PRIMARIA: ${PRODUTO_COR_PRIMARIA:-#1B7A43}
       PRODUTO_LOGO_URL: ${PRODUTO_LOGO_URL:-}
+      # IPs do proxy de quem uvicorn ACEITA X-Forwarded-For (rate limit por
+      # IP real). Só a rede interna do compose + localhost — NUNCA "*"
+      # (qualquer cliente poderia forjar o cabeçalho).
+      FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-172.16.0.0/12,127.0.0.1,10.0.0.0/8,192.168.0.0/16}
     volumes:
       - compra-data:/data
       # Logo próprio do cliente (white-label): substitui o padrão sem tocar

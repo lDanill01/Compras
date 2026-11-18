@@ -81,10 +81,18 @@ from .deps import ErroNegocio  # noqa: E402
 @app.middleware("http")
 async def limitar_tentativas(request: Request, call_next):
     if request.method == "POST" and request.url.path in rate_limit.LIMITADAS:
+        c = rate_limit.chave(request)
         try:
-            rate_limit.verificar(rate_limit.chave(request))
+            rate_limit.excedido(c)
         except ErroNegocio as e:
             return JSONResponse({"detail": e.mensagem}, status_code=429)
+        resposta = await call_next(request)
+        # conta só FALHA (4xx): sucesso não gasta orçamento — um escritório
+        # atrás de um NAT não se tranca; o 429 do próprio limite também não
+        # estende a janela
+        if 400 <= resposta.status_code < 500 and resposta.status_code != 429:
+            rate_limit.registrar(c)
+        return resposta
     return await call_next(request)
 
 

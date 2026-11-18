@@ -17,10 +17,13 @@ jobs:
           python-version: "3.12"
 
       - name: Dependências
-        run: pip install -r backend/requirements.txt cryptography
+        run: pip install -r backend/requirements.txt
 
       - name: Suíte REST (regras + superfície)
         run: python backend/tests/test_rest.py
+
+      - name: Suíte de segurança (rate limit, reset, cookie)
+        run: python backend/tests/test_seguranca.py
 
       - name: Suíte importação CSV
         run: python backend/tests/test_import.py

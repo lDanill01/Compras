@@ -29,17 +29,28 @@ def chave(request) -> str:
     return f"{ip}:{request.url.path}"
 
 
-def verificar(c: str) -> None:
-    """Registra a tentativa; lança ErroNegocio se a janela estourar."""
+def excedido(c: str) -> None:
+    """Lança ErroNegocio se a janela desta chave já estourou.
+
+    Tentativas fora da janela são descartadas; tentativas bloqueadas não
+    são registradas — o lockout não se estende sozinho.
+    """
     agora = time.monotonic()
     janela = config.RATE_LIMIT_JANELA_MIN * 60
     tentativas = [t for t in _registros[c] if agora - t < janela]
+    _registros[c] = tentativas
     if len(tentativas) >= config.RATE_LIMIT_TENTATIVAS:
-        _registros[c] = tentativas
         raise ErroNegocio(MSG)
-    tentativas.append(agora)
-    # guarda só o necessário para a janela atual
-    _registros[c] = tentativas[-config.RATE_LIMIT_TENTATIVAS:]
+
+
+def registrar(c: str) -> None:
+    """Registra UMA falha (chamado só quando a resposta é 4xx).
+
+    Sucesso não gasta o orçamento: um escritório atrás de um NAT
+    compartilhado loga quantos colegas precisar.
+    """
+    _registros[c].append(time.monotonic())
+    _registros[c] = _registros[c][-config.RATE_LIMIT_TENTATIVAS:]
 
 
 def limpar() -> None:

@@ -86,11 +86,21 @@ def rest_cadastro(body: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/auth/logout")
-def rest_logout(request: Request, response: Response, db: Session = Depends(get_db),
-                usuario=Depends(_usuario)):
-    resposta = _rodar(auth.api_logout, db, usuario, {"_token": _token(request)})
+def rest_logout(request: Request, response: Response,
+                db: Session = Depends(get_db)):
+    """Logout sempre "funciona": encerra a sessão (Bearer ou cookie) e
+    apaga o cookie — mesmo com Bearer morto, para não deixar a sessão do
+    navegador viva em máquina compartilhada."""
+    for t in filter(None, [_token(request),
+                           request.cookies.get(COOKIE_SESSAO)]):
+        try:
+            usuario = usuario_autenticado(db, t)
+            _rodar(auth.api_logout, db, usuario, {"_token": t})
+            break
+        except Exception:
+            continue
     response.delete_cookie(COOKIE_SESSAO, path="/")
-    return resposta
+    return {"ok": True, "data": None}
 
 
 @router.post("/auth/senha")
@@ -101,7 +111,14 @@ def rest_alterar_senha(request: Request, body: dict, db: Session = Depends(get_d
 
 
 @router.post("/auth/reset/solicitar")
-def rest_reset_solicitar(body: dict, db: Session = Depends(get_db)):
+def rest_reset_solicitar(request: Request, body: dict,
+                         db: Session = Depends(get_db)):
+    # origem do próprio servidor (Host do request) é permitida por padrão —
+    # cobre o deploy same-origin sem APP_BASE_URL; quem chama direto não
+    # controla o Host que o Caddy encaminha
+    host = request.headers.get("host", "").strip()
+    if host:
+        body["_origens_servidor"] = {f"{request.url.scheme}://{host}"}
     return _rodar(reset.api_solicitar_reset_senha, db, body)
 
 

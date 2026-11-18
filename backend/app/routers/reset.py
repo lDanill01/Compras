@@ -31,22 +31,23 @@ def _resposta_padrao():
     }}
 
 
-def _base_permitido(cliente: str) -> str:
+def _base_permitido(cliente: str, origens_servidor: set[str] | None = None) -> str:
     """Base dos links de redefinição — decidida no servidor.
 
-    APP_BASE_URL (env do servidor) tem prioridade. Sem ela, o base_url do
-    cliente só é aceito se a origem (scheme://netloc) constar de
-    APP_BASE_URL ∪ CORS_ORIGINS. Caso contrário, '' (o e-mail traz só o
-    código) — nunca um domínio escolhido por quem chama a API.
+    APP_BASE_URL (env do servidor) tem prioridade e vence sempre. Sem ela,
+    o base_url do cliente só é aceito se a origem (scheme://netloc) constar
+    de CORS_ORIGINS ou das origens do próprio servidor (Host do request —
+    incontrolável pelo chamador atrás do Caddy). Caso contrário, '' (o
+    e-mail traz só o código) — nunca um domínio escolhido por quem chama.
     """
     if config.APP_BASE_URL:
         return config.APP_BASE_URL.rstrip("/")
-    permitidas = {config.APP_BASE_URL.rstrip("/")}
+    permitidas: set[str] = {o.rstrip("/") for o in (origens_servidor or set()) if o}
     for origem in config.CORS_ORIGINS:
         p = urlsplit(origem)
-        permitidas.add(f"{p.scheme}://{p.netloc}")
+        permitidas.add(f"{p.scheme}://{p.netloc}".rstrip("/"))
     p = urlsplit(str(cliente or "").split("#")[0])
-    origem_cliente = f"{p.scheme}://{p.netloc}"
+    origem_cliente = f"{p.scheme}://{p.netloc}".rstrip("/")
     return origem_cliente if origem_cliente in permitidas else ""
 
 
@@ -73,7 +74,8 @@ def api_solicitar_reset_senha(db: Session, payload: dict):
                       usado=False, criado_em=security.agora()))
     db.commit()
 
-    base = _base_permitido(payload.get("base_url"))
+    base = _base_permitido(payload.get("base_url"),
+                           payload.get("_origens_servidor"))
     link = (base + "#/redefinir/" + token) if base else token
 
     nome = u.nome_completo or email
