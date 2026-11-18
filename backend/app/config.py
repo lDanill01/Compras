@@ -44,9 +44,30 @@ OIDC_REDIRECT_URI = os.environ.get("OIDC_REDIRECT_URI", "")
 # Base do SPA para o callback redirecionar (ex.: https://compras.suaempresa.com.br)
 OIDC_SPA_BASE = os.environ.get("OIDC_SPA_BASE", "")
 OIDC_SCOPES = os.environ.get("OIDC_SCOPES", "openid profile email")
-# Chave para assinar o `state` do OAuth (obrigatória com SSO; gera aleatória
-# por boot se ausente — estados pendentes são invalidados a cada restart)
-SECRET_KEY = os.environ.get("SECRET_KEY", "")
+# Chave para assinar o `state` do OAuth. Se a env SECRET_KEY não vier,
+# gera uma na 1ª execução e **persiste** em <DATA_DIR>/secret_key (0600):
+# a chave sobrevive a restarts e é igual em todos os workers.
+def _carregar_secret_key() -> str:
+    env = os.environ.get("SECRET_KEY", "").strip()
+    if env:
+        return env
+    caminho = os.path.join(DATA_DIR, "secret_key")
+    if os.path.isfile(caminho):
+        with open(caminho, "r", encoding="utf-8") as f:
+            chave = f.read().strip()
+        if chave:
+            return chave
+    import secrets as _secrets
+
+    chave = _secrets.token_hex(32)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    fd = os.open(caminho, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(chave)
+    os.chmod(caminho, 0o600)  # umask pode ter relaxado o modo do arquivo
+    return chave
+
+SECRET_KEY = _carregar_secret_key()
 
 # ---------------------------------------------------------------- CORS
 # A SPA é servida pela própria API (same-origin): CORS desligado por padrão.
