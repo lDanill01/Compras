@@ -76,7 +76,13 @@
       const r = await API.chamar("login", { email, senha }, "");
 
       if (r.ok && r.data && r.data.token) {
-        Sessao.gravar(r.data);
+        /* o token NÃO é gravado: a sessão do navegador viaja no cookie
+         * httpOnly setado pela resposta do login */
+        Sessao.gravar({
+          email: r.data.email,
+          nome: r.data.nome,
+          grupo: r.data.grupo,
+        });
         montarLayout();
         atualizarNav("#/home");
         if (r.data.troca_senha_obrigatoria) {
@@ -92,28 +98,35 @@
   };
 
   /* ------------------------------ SSO callback ------------------------------
-   * O backend Entra ID redireciona para #/sso/{token}; gravamos a sessão
-   * buscando os dados do usuário e entramos no app. #/sso/erro = falha. */
-  ROTAS["#/sso/<token>"] = async function (token) {
-    if (token === "erro") {
-      cascaAuth(`
-        <div class="login-card">
-          <h2>Entrar</h2>
-          <ul class="mensagens"><li class="msg msg-error">
-            <i class="bi bi-x-circle-fill"></i>
-            <span>Não foi possível concluir o login corporativo. Tente novamente.</span>
-          </li></ul>
-          <p class="login-rodape"><a href="#/login"><i class="bi bi-arrow-left"></i> Voltar ao login</a></p>
-        </div>`);
-      return;
-    }
+   * O backend Entra ID redireciona para #/sso-ok com a sessão no cookie
+   * httpOnly; buscamos os dados do usuário e entramos no app.
+   * #/sso/erro = falha. */
+  ROTAS["#/sso/erro"] = function () {
+    cascaAuth(`
+      <div class="login-card">
+        <h2>Entrar</h2>
+        <ul class="mensagens"><li class="msg msg-error">
+          <i class="bi bi-x-circle-fill"></i>
+          <span>Não foi possível concluir o login corporativo. Tente novamente.</span>
+        </li></ul>
+        <p class="login-rodape"><a href="#/login"><i class="bi bi-arrow-left"></i> Voltar ao login</a></p>
+      </div>`);
+  };
+
+  ROTAS["#/sso-ok"] = async function () {
+    cascaAuth(`
+      <div class="login-card">
+        <h2>Entrar</h2>
+        <ul class="mensagens"><li class="msg"><i class="bi bi-arrow-repeat giro"></i>
+          <span>Finalizando o login corporativo…</span></li></ul>
+      </div>`);
 
     const base = CONFIG.API_URL ? CONFIG.API_URL.replace(/\/+$/, "") : "/api";
     try {
-      const r = await fetch(base + "/me", { headers: { Authorization: "Bearer " + token } });
+      const r = await fetch(base + "/me", { credentials: "include" });
       if (!r.ok) throw new Error("Sessão do login corporativo inválida.");
       const eu = await r.json();
-      Sessao.gravar({ token, email: eu.email, nome: eu.nome_completo, grupo: eu.grupo });
+      Sessao.gravar({ email: eu.email, nome: eu.nome_completo, grupo: eu.grupo });
       montarLayout();
       atualizarNav("#/home");
       location.hash = "#/home"; /* hashchange dispara o render */

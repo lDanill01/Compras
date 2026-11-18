@@ -132,8 +132,13 @@ Senhas legadas (SHA-256+salt) migram para bcrypt no 1º login; IDs
 
 - Toda regra de negócio (perfil, transição, permissão, anexos) é validada
   **no servidor** (`backend/`).
-- Sessões: token de 8h na tabela `sessoes` (revogável); trocar senha
-  invalida as demais sessões.
+- Sessões: sessão de 8h na tabela `sessoes` (revogável); o navegador recebe
+  um **cookie httpOnly** (`COOKIE_SECURE=true` quando servido por HTTPS —
+  defina-o no `.env` com TLS do Caddy); trocar senha e redefinir via
+  "Esqueci minha senha" encerram as demais sessões.
+- Autenticação tem **rate limiting** (`RATE_LIMIT_TENTATIVAS`/15 min por IP);
+  a senha provisória do admin vale só por `ADMIN_SENHA_VALIDADE_DIAS` (7)
+  após o 1º boot — troque-a no 1º login.
 - O tamanho de anexos é validado no server (`ANEXO_MAX_BYTES`, 10 MB);
   a API não fica exposta diretamente (rede interna do compose).
 - TLS termina no Caddy com renovação automática.

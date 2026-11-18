@@ -85,6 +85,12 @@ CORS_ORIGINS = [
     o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()
 ]
 
+# ---------------------------------------------------------------- sessão (cookie)
+# A sessão do navegador viaja em cookie httpOnly (não acessível a JS).
+# COOKIE_SECURE=true quando servido por HTTPS (Caddy com TLS em produção);
+# em dev/homolog por HTTP puro, deixe false.
+COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "false").lower() == "true"
+
 # ---------------------------------------------------------------- white-label (marca)
 # Identidade do cliente: entregue ao frontend em /api/config. A cor primária
 # gera toda a paleta no frontend (tema.css mantém o fallback padrão).

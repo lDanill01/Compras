@@ -52,13 +52,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Same-origin por padrão (SPA servida aqui). CORS só com origens externas.
+# Same-origin por padrão (SPA servida aqui). CORS só com origens externas;
+# allow_credentials porque a sessão viaja em cookie httpOnly.
 if config.CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=config.CORS_ORIGINS,
         allow_methods=["*"],
         allow_headers=["*"],
+        allow_credentials=True,
     )
 
 # Superfície RESTful — casos de uso do negócio (auth, pedidos, anexos,

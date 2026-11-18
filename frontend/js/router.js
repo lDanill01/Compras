@@ -17,7 +17,8 @@ function renderizarRota() {
   const rota = rotaAtual();
   const s = Sessao.ler();
   const publica = rota === "#/login" || rota === "#/cadastro"
-    || rota.startsWith("#/redefinir/") || rota.startsWith("#/sso/");
+    || rota.startsWith("#/redefinir/") || rota.startsWith("#/sso/")
+    || rota === "#/sso-ok";
 
   /* Guarda de sessão: qualquer rota protegida sem sessão → login */
   if (!s && !publica) { location.hash = "#/login"; return; }
@@ -27,6 +28,7 @@ function renderizarRota() {
     || (rota.startsWith("#/tramitar/") && (window.ROTAS || {})["#/tramitar/<numero>"])
     || (rota.startsWith("#/redefinir/") && (window.ROTAS || {})["#/redefinir/<token>"])
     || (rota.startsWith("#/sso/") && (window.ROTAS || {})["#/sso/<token>"])
+    || (rota === "#/sso-ok" && (window.ROTAS || {})["#/sso-ok"])
     || null;
   if (!fn) {
     /* Rota desconhecida: mensagem visível em vez de tela em branco. */

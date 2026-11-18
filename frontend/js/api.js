@@ -149,7 +149,9 @@ const API = (() => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 60000);
     try {
-      return await fetch(url, { ...opcoes, signal: ctrl.signal });
+      /* credentials: envia o cookie de sessão httpOnly em todas as chamadas
+       * (same-origin, e cross-origin quando CONFIG.API_URL aponta para fora) */
+      return await fetch(url, { credentials: "include", ...opcoes, signal: ctrl.signal });
     } finally {
       clearTimeout(timer);
     }

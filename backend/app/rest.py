@@ -16,6 +16,7 @@ from fastapi import Depends, HTTPException, Query, Request, Response
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 
+from . import config
 from .database import get_db
 from .deps import ErroNegocio, usuario_autenticado
 from .routers import agregacoes, anexos, auth, pedidos, reset, usuarios
@@ -26,11 +27,27 @@ router = APIRouter(prefix="/api")
 
 MSG_SESSAO = re.compile(r"sess[iã]o expirada", re.IGNORECASE)
 
+# Sessão do navegador em cookie httpOnly: inacessível a JavaScript (XSS não
+# rouba o token). Bearer continua aceito para consumidores da API (testes,
+# CLI, integrações). SameSite=Strict cobre CSRF no uso same-origin (padrão).
+COOKIE_SESSAO = "cf_sessao"
+
+
+def _setar_cookie(response, token: str) -> None:
+    response.set_cookie(
+        COOKIE_SESSAO, token,
+        max_age=config.SESSAO_MINUTOS * 60,
+        httponly=True, samesite="strict",
+        secure=config.COOKIE_SECURE, path="/",
+    )
+
 
 def _token(request: Request) -> str | None:
     auth = request.headers.get("Authorization", "")
     m = re.match(r"^Bearer\s+(.+)$", auth, re.IGNORECASE)
-    return m.group(1).strip() if m else None
+    if m:
+        return m.group(1).strip()
+    return request.cookies.get(COOKIE_SESSAO) or None
 
 
 def _usuario(request: Request, db: Session = Depends(get_db)):
@@ -56,8 +73,11 @@ def _rodar(fn, db: Session, *args):
 # --------------------------------- auth ------------------------------------
 
 @router.post("/auth/login")
-def rest_login(body: dict, db: Session = Depends(get_db)):
-    return _rodar(auth.api_login, db, body)
+def rest_login(response: Response, body: dict, db: Session = Depends(get_db)):
+    data = _rodar(auth.api_login, db, body)
+    if isinstance(data, dict) and data.get("token"):
+        _setar_cookie(response, data["token"])
+    return data
 
 
 @router.post("/auth/cadastro", status_code=201)
@@ -66,9 +86,11 @@ def rest_cadastro(body: dict, db: Session = Depends(get_db)):
 
 
 @router.post("/auth/logout")
-def rest_logout(request: Request, db: Session = Depends(get_db),
+def rest_logout(request: Request, response: Response, db: Session = Depends(get_db),
                 usuario=Depends(_usuario)):
-    return _rodar(auth.api_logout, db, usuario, {"_token": _token(request)})
+    resposta = _rodar(auth.api_logout, db, usuario, {"_token": _token(request)})
+    response.delete_cookie(COOKIE_SESSAO, path="/")
+    return resposta
 
 
 @router.post("/auth/senha")
@@ -103,15 +125,24 @@ def rest_sso_url():
 @router.get("/auth/sso/callback")
 def rest_sso_callback(code: str = "", state: str = "",
                       db: Session = Depends(get_db)):
-    """Entra ID volta aqui; trocamos code → sessão e 302 para a SPA."""
+    """Entra ID volta aqui; trocamos code → sessão e 302 para a SPA.
+
+    A sessão viaja no cookie httpOnly — nada de token no fragmento da URL.
+    """
+    def redirecionar(hash_rota: str, token: str = "") -> RedirectResponse:
+        resp = RedirectResponse(oidc.base_spa() + hash_rota, status_code=302)
+        if token:
+            _setar_cookie(resp, token)
+        return resp
+
     try:
         oidc.estado_verificar(state)
         tokens = oidc.trocar_code(code)
         claims = oidc.validar_id_token(tokens.get("id_token", ""))
         token = oidc.provisionar(db, claims)
-        return RedirectResponse(oidc.base_spa() + "#/sso/" + token, status_code=302)
+        return redirecionar("#/sso-ok", token)
     except Exception:
-        return RedirectResponse(oidc.base_spa() + "#/sso/erro", status_code=302)
+        return redirecionar("#/sso/erro")
 
 
 # ---------------------------------- me/usuários -----------------------------

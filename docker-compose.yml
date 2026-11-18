@@ -30,6 +30,8 @@ services:
       RATE_LIMIT_TENTATIVAS: ${RATE_LIMIT_TENTATIVAS:-10}
       RATE_LIMIT_JANELA_MIN: ${RATE_LIMIT_JANELA_MIN:-15}
       SESSAO_MINUTOS: ${SESSAO_MINUTOS:-480}
+      # Sessão do navegador em cookie httpOnly (COOKIE_SECURE=true com TLS)
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
       DOMINIO_EMAIL: ${DOMINIO_EMAIL:-compraflow.com.br}
       # SMTP para "Esqueci minha senha" (opcional — sem isto, o link vai ao log)
       SMTP_HOST: ${SMTP_HOST:-}

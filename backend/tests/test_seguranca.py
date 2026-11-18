@@ -61,6 +61,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from app.main import app  # noqa: E402
 from app import rate_limit  # noqa: E402
+from app import security  # noqa: E402
 
 EMAIL_ADMIN = "admin@compraflow.com.br"
 
@@ -148,6 +149,40 @@ with TestClient(app, raise_server_exceptions=False) as c:
     check("redefinir 200", r.status_code == 200, str(r.status_code))
     r = c.get(f"{B}/me", headers={"Authorization": f"Bearer {token_bia}"})
     check("sessão antiga morreu → 401", r.status_code == 401, str(r.status_code))
+
+print("— sessão via cookie httpOnly (Task 4) —")
+with TestClient(app, raise_server_exceptions=False) as c:
+    B = "/api"
+    rate_limit.limpar()
+    # janela da senha provisória reiniciada (sentinel = agora)
+    with open(os.path.join(tmp, "admin_seed_em"), "w") as f:
+        f.write(security.agora().isoformat())
+
+    r = c.post(f"{B}/auth/login", json={"email": EMAIL_ADMIN, "senha": "admin123"})
+    check("login 200", r.status_code == 200, str(r.status_code))
+    setc = (r.headers.get("set-cookie") or "").lower()
+    check("Set-Cookie cf_sessao", "cf_sessao=" in setc, setc[:70])
+    check("HttpOnly", "httponly" in setc)
+    check("SameSite=strict", "samesite=strict" in setc)
+    token_admin = r.json()["token"]
+
+    r = c.get(f"{B}/me")
+    check("/me sem Bearer, só com cookie → 200", r.status_code == 200
+          and r.json().get("email") == EMAIL_ADMIN, str(r.status_code))
+
+    c.cookies.clear()
+    r = c.get(f"{B}/me", headers={"Authorization": f"Bearer {token_admin}"})
+    check("Bearer continua aceito (compat) → 200", r.status_code == 200,
+          str(r.status_code))
+
+    r = c.post(f"{B}/auth/login", json={"email": EMAIL_ADMIN, "senha": "admin123"})
+    check("2º login 200", r.status_code == 200, str(r.status_code))
+    r = c.post(f"{B}/auth/logout")
+    check("logout com cookie → 200", r.status_code == 200, str(r.status_code))
+    setc_logout = (r.headers.get("set-cookie") or "").lower()
+    check("logout apaga o cookie", "cf_sessao=" in setc_logout)
+    r = c.get(f"{B}/me")
+    check("/me após logout → 401", r.status_code == 401, str(r.status_code))
 
 print()
 if falhas:

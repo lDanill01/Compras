@@ -1,5 +1,9 @@
-/* Sessão do usuário no client (token + perfil + nome).
- * Guarda em localStorage para sobreviver a recarregamentos da página.
+/* Sessão do usuário no client (perfil + nome).
+ * O TOKEN DE SESSÃO não mora aqui: viaja em cookie httpOnly setado pela API
+ * (impermeável a XSS). O localStorage guarda só os metadados do perfil —
+ * de gravação opcional — para sobreviver a recarregamentos da página;
+ * para contas antigas ainda com token gravado, ele continua sendo usado
+ * via Bearer até expirar.
  */
 const Sessao = (() => {
   const CHAVE = "projeto_compras.sessao";
@@ -9,7 +13,7 @@ const Sessao = (() => {
       const bruto = localStorage.getItem(CHAVE);
       if (!bruto) return null;
       const s = JSON.parse(bruto);
-      if (!s || !s.token || !s.email) return null;
+      if (!s || !s.email) return null;
       if (s.expira_em && Date.now() > s.expira_em) {
         limpar();
         return null;
@@ -21,10 +25,12 @@ const Sessao = (() => {
   }
 
   function gravar({ token, email, nome, grupo }) {
+    const atual = ler() || {};
     localStorage.setItem(
       CHAVE,
       JSON.stringify({
-        token,
+        // token: mantém o de uma sessão anterior (compat), se houver
+        token: token ?? atual.token,
         email,
         nome,
         grupo,

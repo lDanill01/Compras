@@ -7,7 +7,8 @@ Cobre:
   - id_token: validação de assinatura JWKS + iss + aud + exp (mock do IdP);
   - provisionamento: cria conta nova (UserISI_IST), atrela existente,
     bloqueia domínio estranho e usuário inativo;
-  - callback HTTP: redirect 302 para a SPA com token (mockando Entra).
+  - callback HTTP: redirect 302 para a SPA (#/sso-ok) com cookie de sessão
+    (mockando Entra).
 """
 import base64
 import hashlib
@@ -242,10 +243,11 @@ with TestClient(app, raise_server_exceptions=False) as c:
               follow_redirects=False)
     check("302 redirect", r.status_code == 302, str(r.status_code))
     loc = r.headers.get("location", "")
-    check("redirect para SPA com token",
-          loc.startswith("https://localhost#/sso/"), loc[:50])
-    spa_token = loc.split("#/sso/")[-1]
-    r2 = c.get("/api/me", headers={"Authorization": f"Bearer {spa_token}"})
+    check("redirect #/sso-ok sem token na URL",
+          loc.endswith("#/sso-ok") and "#/sso/" not in loc, loc[:60])
+    setc = (r.headers.get("set-cookie") or "").lower()
+    check("sessão via cookie httpOnly", "cf_sessao=" in setc and "httponly" in setc)
+    r2 = c.get("/api/me")
     check("sessão SSO funcional (/me)", r2.status_code == 200
           and r2.json()["email"] == "novo.sso@ms.senai.br")
 
