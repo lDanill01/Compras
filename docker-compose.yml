@@ -24,7 +24,11 @@ services:
       # Conta administrativa (troque a senha no 1º login)
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@compraflow.com.br}
       ADMIN_SENHA_PADRAO: ${ADMIN_SENHA_PADRAO:-admin123}
+      ADMIN_SENHA_VALIDADE_DIAS: ${ADMIN_SENHA_VALIDADE_DIAS:-7}
       SEED_ADMIN: ${SEED_ADMIN:-true}
+      # Rate limiting de autenticação (login/cadastro/reset)
+      RATE_LIMIT_TENTATIVAS: ${RATE_LIMIT_TENTATIVAS:-10}
+      RATE_LIMIT_JANELA_MIN: ${RATE_LIMIT_JANELA_MIN:-15}
       SESSAO_MINUTOS: ${SESSAO_MINUTOS:-480}
       DOMINIO_EMAIL: ${DOMINIO_EMAIL:-compraflow.com.br}
       # SMTP para "Esqueci minha senha" (opcional — sem isto, o link vai ao log)

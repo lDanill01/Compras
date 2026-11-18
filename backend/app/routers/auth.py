@@ -1,6 +1,6 @@
 """routers/auth.py — port de Auth.gs (login/cadastro/logout)."""
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
@@ -8,7 +8,6 @@ from .. import config, security
 from ..deps import (
     ErroNegocio,
     buscar_usuario,
-    eh_admin,
     exigir,
     exigir_email_institucional,
     is_valido,
@@ -16,6 +15,7 @@ from ..deps import (
     nome_exibicao,
 )
 from ..models import Sessao, Usuario
+from ..seed import semente_admin
 
 GRUPOS = {"SOLICITANTE": "UserISI_IST", "TIME": "Time_Compras",
           "MANAGER": "Manager_Compras", "SUPER": "SuperUsuario"}
@@ -44,12 +44,24 @@ def api_login(db: Session, payload: dict):
         db.commit()
 
     token = security.novo_token()
+
+    # Bloqueio da senha provisória do admin: fora da janela de carência
+    # (env ADMIN_SENHA_VALIDADE_DIAS; 0 desativa), a senha padrão é recusada.
+    senha_padrao = security.verificar_senha(
+        config.ADMIN_SENHA_PADRAO, u.senha_hash, u.salt
+    )
+    if senha_padrao and config.ADMIN_SENHA_VALIDADE_DIAS > 0:
+        semente = semente_admin()
+        if security.agora() > semente + timedelta(
+                days=config.ADMIN_SENHA_VALIDADE_DIAS):
+            return {"ok": False, "erro": (
+                "A senha provisória do administrador expirou. "
+                "Redefina a senha em 'Esqueci minha senha'.")}
+
     db.add(Sessao(token=token, email=email, expira_em=security.expiracao_sessao()))
     db.commit()
 
-    troca_obrigatoria = eh_admin(email) and security.verificar_senha(
-        config.ADMIN_SENHA_PADRAO, u.senha_hash, u.salt
-    )
+    troca_obrigatoria = bool(senha_padrao)
     return {
         "ok": True,
         "data": {

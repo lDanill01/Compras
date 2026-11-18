@@ -67,6 +67,25 @@ from .rest import router as rest_router  # noqa: E402
 app.include_router(rest_router)
 
 
+# ------------------------------- rate limiting -------------------------------
+# Tentativas de autenticação (POST) limitadas por IP+rota, em memória.
+from fastapi.responses import JSONResponse
+from fastapi import Request
+
+from . import rate_limit  # noqa: E402
+from .deps import ErroNegocio  # noqa: E402
+
+
+@app.middleware("http")
+async def limitar_tentativas(request: Request, call_next):
+    if request.method == "POST" and request.url.path in rate_limit.LIMITADAS:
+        try:
+            rate_limit.verificar(rate_limit.chave(request))
+        except ErroNegocio as e:
+            return JSONResponse({"detail": e.mensagem}, status_code=429)
+    return await call_next(request)
+
+
 @app.get("/api/health")
 def health():
     return {"ok": True, "data": {"status": "up", "version": app.version}}

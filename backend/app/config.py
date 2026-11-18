@@ -23,6 +23,14 @@ SESSAO_MINUTOS = int(os.environ.get("SESSAO_MINUTOS", "480"))  # 8h
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@compraflow.com.br").strip().lower()
 ADMIN_SENHA_PADRAO = os.environ.get("ADMIN_SENHA_PADRAO", "admin123")
 SEED_ADMIN = os.environ.get("SEED_ADMIN", "true").lower() != "false"
+# Janela de carência (dias) em que o admin pode entrar com a senha padrão
+# após o seed; 0 desativa o bloqueio.
+ADMIN_SENHA_VALIDADE_DIAS = int(os.environ.get("ADMIN_SENHA_VALIDADE_DIAS", "7"))
+
+# ---------------------------------------------------------------- rate limiting
+# Tentativas por IP+rota na janela deslizante (login, cadastro, reset).
+RATE_LIMIT_TENTATIVAS = int(os.environ.get("RATE_LIMIT_TENTATIVAS", "10"))
+RATE_LIMIT_JANELA_MIN = int(os.environ.get("RATE_LIMIT_JANELA_MIN", "15"))
 
 # ---------------------------------------------------------------- e-mail institucional
 DOMINIO_EMAIL = os.environ.get("DOMINIO_EMAIL", "compraflow.com.br")
